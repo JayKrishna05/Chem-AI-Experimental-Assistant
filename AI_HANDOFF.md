@@ -21,6 +21,9 @@ Implemented:
 - `backend/api/models.py`
 - `scripts/run_api.py`
 - `scripts/test_api_endpoints.py`
+- `backend/tools/analytics_tools.py`
+- `scripts/test_analytics_tools.py`
+- `scripts/example_analytics_outputs.py`
 
 Repository:
 
@@ -93,16 +96,35 @@ FastAPI backend:
 - Typed API models live in `backend/api/models.py`
 - Endpoint smoke test command: `python scripts/test_api_endpoints.py`
 
+Analytics tools:
+
+- `catalyst_statistics()` extracts catalyst entries from `reactions.catalysts_json`
+- `yield_statistics()` summarizes finite `procedures.yield_percent` values and reports yields below 0 or above 100
+- `temperature_statistics()` summarizes finite `procedures.temperature_c` values
+- `source_dataset_statistics()` aggregates reaction/procedure/yield/temperature coverage by source dataset
+- `reaction_type_statistics()` aggregates reaction/procedure/yield/temperature coverage by reaction type
+- `dataset_summary()` reports dataset counts plus chemistry/procedure coverage
+- Analytics assumptions are included in each returned payload
+- Validation command: `python scripts/test_analytics_tools.py`
+- Example output command: `python scripts/example_analytics_outputs.py`
+
+Analytics validation notes:
+
+- Tests compare every analytics function against direct DuckDB SQL queries
+- Null and non-finite numeric values are excluded from yield and temperature numeric summaries
+- Non-finite temperature values remain visible through coverage counts
+- `yield_statistics(reaction_type="Suzuki")` returns zero matching procedure records in the current normalized dataset
+
 ## Current Task
 
-Build DuckDB-backed analytics tools.
+Build the planner/provider layer.
 
 Recommended next task:
 
-- Implement `reaction_statistics()` against `backend/database/ord.duckdb`
-- Keep analytics queries in DuckDB
-- Start with reaction type, source dataset, temperature, and yield distributions
-- Avoid FastAPI, planner logic, UI, vector databases, and agent frameworks until their phases
+- Add provider abstraction stubs before wiring Ollama
+- Keep planner as explicit Planner + Tools, not autonomous agents
+- Reuse existing DuckDB tool and analytics functions
+- Avoid UI, file uploads, vector databases, and agent frameworks until their phases
 
 ## Rules
 

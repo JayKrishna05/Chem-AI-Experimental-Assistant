@@ -22,6 +22,9 @@ Foundation Setup
 - FastAPI backend layer implemented in `backend/api/`
 - API endpoint smoke tests added at `scripts/test_api_endpoints.py`
 - Local API startup script added at `scripts/run_api.py`
+- DuckDB-backed analytics tools implemented in `backend/tools/analytics_tools.py`
+- Analytics validation tests added at `scripts/test_analytics_tools.py`
+- Analytics example output script added at `scripts/example_analytics_outputs.py`
 
 Datasets:
 
@@ -69,15 +72,26 @@ FastAPI backend:
 - Typed request and response models live in `backend/api/models.py`
 - Local startup: `python scripts/run_api.py`
 
+Analytics tools:
+
+- `catalyst_statistics()` ranks catalyst entries from `reactions.catalysts_json`
+- `yield_statistics()` summarizes finite `procedures.yield_percent` values and reports out-of-range yield counts
+- `temperature_statistics()` summarizes finite `procedures.temperature_c` values
+- `source_dataset_statistics()` reports reaction/procedure/yield/temperature coverage by source dataset
+- `reaction_type_statistics()` reports reaction/procedure/yield/temperature coverage by reaction type
+- `dataset_summary()` reports chemistry coverage and dataset-level counts
+- Each analytics function returns structured results with documented assumptions
+- Validation tests compare analytics outputs against direct DuckDB queries
+- `yield_statistics(reaction_type="Suzuki")` currently returns zero matching procedure records because the normalized procedure reaction types in this dataset do not include Suzuki
+
 ## Current Focus
 
-- Build analytics tools on top of DuckDB
+- Prepare planner/provider layer while keeping tool execution explicit and DuckDB-backed
 
 ## Next Milestones
 
-1. Analytics tools
-2. Ollama planner
-3. Chat interface
+1. Ollama planner
+2. Chat interface
 
 ## Infrastructure Status
 
@@ -89,7 +103,7 @@ Frontend: Not Started
 
 Planner: Not Started
 
-Analytics: Not Started
+Analytics: DuckDB chemistry analytics implemented
 
 ## Repository Status
 

@@ -20,14 +20,16 @@
 - [x] FastAPI backend retrieval layer
 - [x] API endpoint smoke tests
 - [x] Simple local API startup script
+- [x] Analytics tools
+- [x] Analytics validation tests
+- [x] Analytics example outputs
 
 ## Current
 
-- [ ] Analytics tools
+- [ ] Ollama planner
 
 ## Next
 
-- [ ] Ollama planner
 - [ ] Chat interface
 
 ## Future
