@@ -39,7 +39,7 @@
 
 ## Current
 
-- [ ] Chat interface (Next.js)
+- [x] Chat interface (Next.js)
 
 ## Next
 

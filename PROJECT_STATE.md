@@ -36,6 +36,11 @@ Phase 4 — Frontend Chat Interface
 - Chat endpoint robustness improvements (payload truncation, formatter timeout, `formatting` event) implemented
 - Chat endpoint smoke tests added at `scripts/test_chat_endpoint.py`
 
+- **Next.js 15 Frontend Chat Interface** completed with tailwindcss and shadcn/ui.
+- `useChatStream` hook implemented for parsing the SSE stream and managing state.
+- `ChatInterface`, `ChatStream`, `ChatMessage`, `ChatInput` components added.
+- `ToolResultCard` added to display raw JSON payloads seamlessly.
+
 Datasets:
 
 - Reactions: 2,376,120
@@ -78,13 +83,13 @@ Planner layer (`backend/planner/`):
 
 ## Current Focus
 
-- Next.js chat interface (Phase 4)
+- File upload UI support and Experiment comparison (Phase 5)
 
 ## Next Milestones
 
-1. Initialize Next.js project.
-2. Build chat UI consuming the `POST /chat` SSE stream.
-3. Add specialized React cards for rendering `tool_result` data.
+1. File upload workflow in frontend.
+2. Experiment comparison engine backend implementation.
+3. OpenAI/Anthropic/Gemini stub implementations.
 
 ## Infrastructure Status
 
@@ -96,7 +101,7 @@ Providers: BaseProvider + OllamaProvider live, stubs for OpenAI/Anthropic/Gemini
 
 Planner: Fully implemented — intent → DSL → validate → dispatch → result.
 
-Frontend: Not Started.
+Frontend: Phase 4 completed (Next.js chat interface built with ToolResultCard support).
 
 ## Repository Status
 

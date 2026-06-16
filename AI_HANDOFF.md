@@ -4,17 +4,21 @@ Date: 2026-06-16
 
 ## Current Status
 
-Phase 3 Backend completed. `POST /chat` with SSE streaming is finished.
+Phase 4 Frontend completed. `Next.js` chat interface with `SSE streaming` is finished.
 
 Implemented this milestone:
 
-- `backend/api/models.py` — Added `ChatRequest` model.
-- `backend/chat/formatter.py` — `format_response` function that takes `PlannerResult` and queries the LLM for a natural-language summary of the raw tool JSON.
-- `backend/chat/stream.py` — `stream_chat_events` generator. Emits SSE sequence: `thinking` -> `tool_selected` -> `tool_result` (with both raw data & formatted text) -> `done`.
-- `backend/api/chat_routes.py` — FastAPI router with the `/chat` endpoint.
-- `scripts/test_chat_endpoint.py` — E2E endpoint smoke tests using a mocked Provider and FastAPI `TestClient`.
+- `frontend/src/app/page.tsx` — Root application page rendering the ChatInterface.
+- `frontend/src/hooks/useChatStream.ts` — React hook parsing the SSE text/event-stream.
+- `frontend/src/types/chat.ts` — Types for SSE events and Chat Messages.
+- `frontend/src/components/ChatInterface.tsx` — Main chat layout wrapper.
+- `frontend/src/components/ChatStream.tsx` — Message list container.
+- `frontend/src/components/ChatMessage.tsx` — Individual message bubble.
+- `frontend/src/components/ChatInput.tsx` — User input box.
+- `frontend/src/components/ToolResultCard.tsx` — Collapsible card for rendering `tool_result` structured JSON.
+- `frontend/src/components/StatusIndicator.tsx` — Loading indicators for `thinking`, `tool_selected`, and `formatting`.
 
-All prior work remains intact. Backend is now 100% database-agnostic at the chat and planner layer, allowing smooth transition to PostgreSQL + pgvector later.
+All prior backend work remains intact. 
 
 ## Architecture (Current)
 
@@ -27,7 +31,7 @@ Provider Layer
 Planner Layer
   User question → Planner.plan(question) → JSON extraction → Tool dispatch → PlannerResult
 
-Chat Layer (NEW)
+Chat Layer
   POST /chat (SSE Stream)
     ↓
   emit: {type: "thinking"}
@@ -41,6 +45,11 @@ Chat Layer (NEW)
   emit: {type: "tool_result", result: {...raw...}, text: "...summary..."}
     ↓
   emit: {type: "done"}
+
+Frontend Layer (NEW)
+  Next.js 15 (App Router) → TailwindCSS + shadcn/ui
+  Hook: useChatStream (manages POST /chat)
+  Component: ChatInterface (glues everything)
 ```
 
 ## SSE Event Flow
@@ -67,16 +76,21 @@ python scripts/test_planner.py
 python scripts/test_chat_endpoint.py
 ```
 
+Inside `frontend/`:
+```
+npm run lint
+npm run build
+```
+
 ## Current Task
 
-Begin **Phase 4: Frontend Development**.
+Begin **Phase 5: Experiment comparison engine and file upload workflow**.
 
 ### Recommended implementation
 
-1. **Initialize Next.js project:** Create `frontend/` directory. Use Next.js with App Router, TailwindCSS, and shadcn/ui.
-2. **Setup Fetch/SSE Hooks:** Implement a custom React hook (or use an existing library) to handle the SSE `/chat` endpoint parsing.
-3. **Chat Interface:** Build a modern, sleek chat interface (vibrant colors, glassmorphism, dynamic design as per UI instructions).
-4. **Tool Result Cards:** When the `tool_result` event fires, map the `result` JSON to a custom React component (e.g., a chart for `yield_statistics` or a grid for `search_reactions`), and display the `text` field as the assistant's dialogue.
+1. **File Upload UI:** Add file upload capability (PDF, DOCX, TXT, CSV, JSON, XLSX) in the chat frontend.
+2. **Analysis Endpoint:** Create a new backend endpoint `POST /analyze` to process uploads.
+3. **Extraction & Comparison:** Connect the file upload to the planner or a specialized comparison pipeline.
 
 ## Rules
 
