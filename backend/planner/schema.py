@@ -84,9 +84,16 @@ TOOL_FILTER_SCHEMAS: dict[str, dict[str, type]] = {
     },
     "source_dataset_statistics": {
         "reaction_type": _STR,
+        "sort_by": _STR,
         "limit": _INT,
     },
     "reaction_type_statistics": {
+        "source_dataset": _STR,
+        "sort_by": _STR,
+        "limit": _INT,
+    },
+    "reagent_statistics": {
+        "reaction_type": _STR,
         "source_dataset": _STR,
         "limit": _INT,
     },

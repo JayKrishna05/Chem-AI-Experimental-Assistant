@@ -198,6 +198,8 @@ def yield_statistics(
             "Yields are read from procedures.yield_percent.",
             "Null and non-finite yields are excluded from numeric statistics.",
             "No correction is applied for yield basis, scale, purity, or repeated experiments.",
+            "Raw statistics include extreme outliers (>100%) present in ORD data.",
+            "Use clean_statistics for chemically meaningful 0-100% range.",
         ],
         database_path=database_path,
     )
@@ -208,13 +210,35 @@ def yield_statistics(
             COALESCE(SUM(CASE WHEN p.yield_percent < 0 THEN 1 ELSE 0 END), 0)
                 AS below_zero_count,
             COALESCE(SUM(CASE WHEN p.yield_percent > 100 THEN 1 ELSE 0 END), 0)
-                AS above_hundred_count
+                AS above_hundred_count,
+            COALESCE(SUM(CASE WHEN p.yield_percent BETWEEN 0 AND 100 THEN 1 ELSE 0 END), 0)
+                AS valid_range_count
         FROM {table_expression}
         {_where_sql([*where_clauses, 'p.yield_percent IS NOT NULL AND isfinite(p.yield_percent)'])}
         """,
         params,
     )
+    # Clean statistics: only valid 0-100% yields for meaningful summaries
+    valid_where = _where_sql([*where_clauses, "p.yield_percent >= 0", "p.yield_percent <= 100"])
+    payload["clean_statistics"] = _fetch_one(
+        database_path,
+        f"""
+        SELECT
+            COUNT(*) AS count,
+            AVG(p.yield_percent) AS average,
+            MEDIAN(p.yield_percent) AS median,
+            MIN(p.yield_percent) AS minimum,
+            MAX(p.yield_percent) AS maximum,
+            STDDEV_SAMP(p.yield_percent) AS sample_stddev,
+            quantile_cont(p.yield_percent, 0.25) AS p25,
+            quantile_cont(p.yield_percent, 0.75) AS p75
+        FROM {table_expression}
+        {valid_where}
+        """,
+        params,
+    )
     return payload
+
 
 
 def temperature_statistics(
@@ -235,7 +259,7 @@ def temperature_statistics(
         where_clauses.append("r.source_dataset ILIKE ?")
         params.append(_like_pattern(source_dataset))
 
-    return _numeric_statistics(
+    payload = _numeric_statistics(
         tool="temperature_statistics",
         table_expression=table_expression,
         value_column="p.temperature_c",
@@ -247,19 +271,46 @@ def temperature_statistics(
             "Temperatures are read from procedures.temperature_c.",
             "Null and non-finite temperatures are excluded from numeric statistics.",
             "Temperatures are treated as reported Celsius values from the existing dataset.",
+            "The global median is 0°C because ~81% of records are at or below 0°C (likely default/unset values).",
+            "Use clean_statistics for the chemically meaningful -100°C to 300°C range.",
         ],
         database_path=database_path,
     )
+    # Clean statistics: chemically plausible range only
+    valid_where = _where_sql([*where_clauses, "p.temperature_c >= -100", "p.temperature_c <= 300"])
+    payload["clean_statistics"] = _fetch_one(
+        database_path,
+        f"""
+        SELECT
+            COUNT(*) AS count,
+            AVG(p.temperature_c) AS average,
+            MEDIAN(p.temperature_c) AS median,
+            MIN(p.temperature_c) AS minimum,
+            MAX(p.temperature_c) AS maximum,
+            STDDEV_SAMP(p.temperature_c) AS sample_stddev,
+            quantile_cont(p.temperature_c, 0.25) AS p25,
+            quantile_cont(p.temperature_c, 0.75) AS p75
+        FROM {table_expression}
+        {valid_where}
+        """,
+        params,
+    )
+    return payload
+
 
 
 def source_dataset_statistics(
     *,
     reaction_type: str | None = None,
+    sort_by: str = "reaction_count",
     limit: int = DEFAULT_LIMIT,
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Summarize reaction/procedure/yield coverage by ORD source dataset."""
     row_limit = _normalize_limit(limit)
+    if sort_by not in ("reaction_count", "procedure_count", "yield_count", "temperature_count"):
+        sort_by = "reaction_count"
+    
     where_clauses, params = _reaction_filters(reaction_type=reaction_type)
     where_sql = _where_sql(where_clauses)
     params.append(row_limit)
@@ -286,7 +337,7 @@ def source_dataset_statistics(
         LEFT JOIN procedure_counts AS pc ON pc.reaction_id = r.reaction_id
         {where_sql}
         GROUP BY r.source_dataset
-        ORDER BY reaction_count DESC, r.source_dataset
+        ORDER BY {sort_by} DESC, r.source_dataset
         LIMIT ?
         """,
         params,
@@ -308,11 +359,15 @@ def source_dataset_statistics(
 def reaction_type_statistics(
     *,
     source_dataset: str | None = None,
+    sort_by: str = "reaction_count",
     limit: int = DEFAULT_LIMIT,
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Summarize reaction/procedure/yield coverage by reaction type."""
     row_limit = _normalize_limit(limit)
+    if sort_by not in ("reaction_count", "procedure_count", "yield_count", "temperature_count"):
+        sort_by = "reaction_count"
+        
     where_clauses, params = _reaction_filters(source_dataset=source_dataset)
     where_sql = _where_sql(where_clauses)
     params.append(row_limit)
@@ -339,7 +394,7 @@ def reaction_type_statistics(
         LEFT JOIN procedure_counts AS pc ON pc.reaction_id = r.reaction_id
         {where_sql}
         GROUP BY r.reaction_type
-        ORDER BY reaction_count DESC, r.reaction_type
+        ORDER BY {sort_by} DESC, r.reaction_type
         LIMIT ?
         """,
         params,
@@ -420,5 +475,57 @@ def dataset_summary(
             "Counts are computed from the live DuckDB tables.",
             "Reaction coverage uses JSON array length checks on preserved chemistry fields.",
             "Procedure coverage reports both non-null and finite normalized scalar fields.",
+        ],
+    }
+
+
+def reagent_statistics(
+    *,
+    reaction_type: str | None = None,
+    source_dataset: str | None = None,
+    limit: int = DEFAULT_LIMIT,
+    database_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Rank reagent entries by occurrence and distinct reaction coverage.
+    
+    Reagents include solvents and other additives stored in reactions.reagents_json.
+    """
+    row_limit = _normalize_limit(limit)
+    where_clauses, params = _reaction_filters(reaction_type, source_dataset)
+    where_clauses.append("json_array_length(r.reagents_json) > 0")
+    where_sql = _where_sql(where_clauses)
+    params.append(row_limit)
+
+    results = _fetch_all(
+        database_path,
+        f"""
+        SELECT
+            COALESCE(json_extract_string(rg.value, '$.smiles'), '') AS reagent_smiles,
+            COALESCE(json_extract_string(rg.value, '$.name'), '') AS reagent_name,
+            COUNT(*) AS reagent_entry_count,
+            COUNT(DISTINCT r.reaction_id) AS reaction_count
+        FROM reactions AS r, json_each(r.reagents_json) AS rg
+        {where_sql}
+        GROUP BY reagent_smiles, reagent_name
+        HAVING reagent_smiles <> '' OR reagent_name <> ''
+        ORDER BY reaction_count DESC, reagent_entry_count DESC, reagent_smiles, reagent_name
+        LIMIT ?
+        """,
+        params,
+    )
+
+    return {
+        "tool": "reagent_statistics",
+        "filters": {
+            "reaction_type": reaction_type,
+            "source_dataset": source_dataset,
+        },
+        "limit": row_limit,
+        "count": len(results),
+        "results": results,
+        "assumptions": [
+            "Reagents are extracted from reactions.reagents_json.",
+            "This includes solvents, bases, and other additives classified as reagents in ORD.",
+            "reaction_count counts distinct reactions containing that reagent entry.",
         ],
     }

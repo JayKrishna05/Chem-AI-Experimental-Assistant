@@ -89,6 +89,7 @@ class OllamaProvider(BaseProvider):
         messages: list[Message],
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -122,7 +123,7 @@ class OllamaProvider(BaseProvider):
         if options:
             body["options"] = options
 
-        raw = self._post(_CHAT_PATH, body)
+        raw = self._post(_CHAT_PATH, body, timeout=timeout)
         content = raw.get("message", {}).get("content", "")
         return ChatResponse(
             content=content,
@@ -136,6 +137,7 @@ class OllamaProvider(BaseProvider):
         prompt: str,
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -167,7 +169,7 @@ class OllamaProvider(BaseProvider):
         if options:
             body["options"] = options
 
-        raw = self._post(_GENERATE_PATH, body)
+        raw = self._post(_GENERATE_PATH, body, timeout=timeout)
         content = raw.get("response", "")
         return GenerateResponse(
             content=content,
@@ -221,7 +223,7 @@ class OllamaProvider(BaseProvider):
             options["num_predict"] = int(max_tokens)
         return options
 
-    def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+    def _post(self, path: str, body: dict[str, Any], timeout: float | None = None) -> dict[str, Any]:
         url = self._base_url + path
         payload = json.dumps(body).encode("utf-8")
         req = Request(
@@ -231,7 +233,8 @@ class OllamaProvider(BaseProvider):
             method="POST",
         )
         try:
-            with urlopen(req, timeout=self._timeout) as resp:
+            print(f"[OllamaProvider] POST {path} with timeout: {timeout or self._timeout}")
+            with urlopen(req, timeout=timeout or self._timeout) as resp:
                 raw_bytes = resp.read()
         except URLError as exc:
             raise OllamaConnectionError(

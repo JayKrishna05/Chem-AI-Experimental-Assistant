@@ -32,6 +32,7 @@ from backend.tools import (
     dataset_summary,
     molecule_lookup,
     reaction_type_statistics,
+    reagent_statistics,
     search_procedures,
     search_reactions,
     source_dataset_statistics,
@@ -240,5 +241,22 @@ def analytics_summary() -> DatasetSummaryResponse:
     try:
         payload = dataset_summary()
         return DatasetSummaryResponse.model_validate(payload)
+    except Exception as exc:  # noqa: BLE001
+        handle_tool_error(exc)
+
+
+@router.get("/analytics/reagents")
+def analytics_reagents(
+    reaction_type: Annotated[str | None, Query()] = None,
+    source_dataset: Annotated[str | None, Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+) -> dict:
+    """Rank reagents/solvents by occurrence and distinct reaction coverage."""
+    try:
+        return reagent_statistics(
+            reaction_type=reaction_type,
+            source_dataset=source_dataset,
+            limit=limit,
+        )
     except Exception as exc:  # noqa: BLE001
         handle_tool_error(exc)

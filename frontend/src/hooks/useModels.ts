@@ -5,6 +5,7 @@ export function useModels() {
   const [models, setModels] = useState<string[]>([]);
   const [currentPlannerModel, setCurrentPlannerModel] = useState<string>("loading...");
   const [currentFormatterModel, setCurrentFormatterModel] = useState<string>("loading...");
+  const [formatterTimeout, setFormatterTimeout] = useState<number>(59.0);
 
   const fetchModels = useCallback(async () => {
     try {
@@ -23,18 +24,22 @@ export function useModels() {
         const currentData = (await currentRes.json()) as CurrentModelsResponse;
         setCurrentPlannerModel(currentData.planner_model);
         setCurrentFormatterModel(currentData.formatter_model);
+        if (currentData.formatter_timeout) {
+          setFormatterTimeout(currentData.formatter_timeout);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch models", err);
     }
   }, []);
 
-  const updateModels = async (plannerModel?: string, formatterModel?: string) => {
+  const updateModels = async (plannerModel?: string, formatterModel?: string, timeout?: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const body: Record<string, string> = {};
+      const body: Record<string, string | number> = {};
       if (plannerModel) body.planner_model = plannerModel;
       if (formatterModel) body.formatter_model = formatterModel;
+      if (timeout !== undefined) body.formatter_timeout = timeout;
 
       const res = await fetch(`${apiUrl}/models/current`, {
         method: "POST",
@@ -46,6 +51,9 @@ export function useModels() {
         const data = (await res.json()) as CurrentModelsResponse;
         setCurrentPlannerModel(data.planner_model);
         setCurrentFormatterModel(data.formatter_model);
+        if (data.formatter_timeout) {
+          setFormatterTimeout(data.formatter_timeout);
+        }
       }
     } catch (err) {
       console.error("Failed to update models", err);
@@ -60,6 +68,7 @@ export function useModels() {
     models,
     currentPlannerModel,
     currentFormatterModel,
+    formatterTimeout,
     updateModels
   };
 }

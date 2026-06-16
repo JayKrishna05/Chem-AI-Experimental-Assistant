@@ -25,13 +25,15 @@ class ModelListResponse(BaseModel):
 
 
 class CurrentModelsResponse(BaseModel):
-    planner_model: str
-    formatter_model: str
+    planner_model: str | None
+    formatter_model: str | None
+    formatter_timeout: float | None = 59.0
 
 
 class SetModelsRequest(BaseModel):
     planner_model: str | None = None
     formatter_model: str | None = None
+    formatter_timeout: float | None = None
 
 
 class ReactionSearchParams(BaseModel):

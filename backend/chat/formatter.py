@@ -14,7 +14,7 @@ def format_response(
     provider: BaseProvider,
     planner_result: PlannerResult,
     model: str | None = None,
-    timeout: float = 15.0,
+    timeout: float = 59.0,
 ) -> str:
     """Format a natural language response from a raw tool payload.
     
@@ -41,7 +41,12 @@ def format_response(
         "Your task is to summarize the raw JSON output into a natural, conversational response. "
         "Focus on the most important numbers, findings, or trends. "
         "If the tool found zero results or no data, state that clearly. "
-        "Do not invent information or mention the underlying JSON structure."
+        "Do not invent information or mention the underlying JSON structure. "
+        "IMPORTANT: If the JSON contains both 'statistics' and 'clean_statistics', "
+        "prefer 'clean_statistics' as it filters out extreme outliers and uses chemically "
+        "meaningful ranges (yields 0-100%, temperatures -100°C to 300°C). "
+        "If clean_statistics has far fewer records than the total, mention the data quality issue. "
+        "Always report average, median, min, and max from clean_statistics when available."
     )
 
     user_content = (
@@ -55,12 +60,29 @@ def format_response(
         Message(role="user", content=user_content),
     ]
 
+    import time
+    from backend.api.state import active_models
+    
+    start_time = time.time()
+    prompt_size = len(sys_prompt) + len(user_content)
+    
+    print(f"[Formatter Request] Planner model: {active_models.get('planner_model')}, Formatter model: {model}, Configured timeout: {timeout}, Prompt size: {prompt_size} chars")
+
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(provider.chat, messages, model=model)
+            future = executor.submit(provider.chat, messages, model=model, timeout=timeout)
             response = future.result(timeout=timeout)
+            duration = time.time() - start_time
+            print(f"[Formatter Success] Response size: {len(response.content)} chars, Duration: {duration:.2f}s")
             return response.content.strip()
-    except concurrent.futures.TimeoutError:
-        return "The response formatting timed out."
     except Exception as exc:
-        return f"Error formatting response: {exc}"
+        duration = time.time() - start_time
+        err_type = type(exc).__name__
+        print(f"[Formatter Failure] Duration: {duration:.2f}s, Reason: {err_type}: {exc}")
+        
+        # Fallback summary
+        try:
+            res_count = tool_result.get("count", len(tool_result.get("results", [])) if "results" in tool_result else "an unknown number of")
+            return f"I found {res_count} matching records using {planner_result.tool}. The summary model failed to respond before the timeout or encountered an error. The raw results remain available below."
+        except Exception:
+            return f"Formatting failed. The raw results remain available below."

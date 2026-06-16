@@ -9,6 +9,7 @@ export interface ModelsResponse {
 export interface CurrentModelsResponse {
   planner_model: string;
   formatter_model: string;
+  formatter_timeout: number;
 }
 
 export interface ChatMessage {

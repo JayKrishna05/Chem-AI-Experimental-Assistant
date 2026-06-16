@@ -1,38 +1,54 @@
 # AI HANDOFF
 
-Date: 2026-06-16
+Date: 2026-06-17
 
 ## Current Status
 
-Phase 4 Frontend completed. `Next.js` chat interface with `SSE streaming` is finished.
+Phase 4 complete + **Pre-Phase 5 Capability Audit complete**.
 
-Implemented this milestone:
+100-question capability audit performed. Score: **87/93 = 93.5%**.
 
-- `frontend/src/app/page.tsx` — Root application page rendering the ChatInterface.
-- `frontend/src/hooks/useChatStream.ts` — React hook parsing the SSE text/event-stream.
-- `frontend/src/types/chat.ts` — Types for SSE events and Chat Messages.
-- `frontend/src/components/ChatInterface.tsx` — Main chat layout wrapper.
-- `frontend/src/components/ChatStream.tsx` — Message list container.
-- `frontend/src/components/ChatMessage.tsx` — Individual message bubble.
-- `frontend/src/components/ChatInput.tsx` — User input box.
-- `frontend/src/components/ToolResultCard.tsx` — Collapsible card for rendering `tool_result` structured JSON.
-- `frontend/src/components/StatusIndicator.tsx` — Loading indicators for `thinking`, `tool_selected`, and `formatting`.
-- `backend/utils.py` — `sanitize_json` utility created and applied to all DB retrieval and SSE outputs to convert `NaN` and `Infinity` into `null` (None), ensuring RFC-compliant JSON parsing on the frontend.
-- **Model Management**: Added model retrieval API (`GET /models`, `GET /models/current`, `POST /models/current`) and global `active_models` state in `backend/api/state.py`.
-- **Frontend Model Switcher**: Added `useModels.ts` hook and modified `ChatInterface.tsx` to include dropdown selectors for dynamic switching of both the `planner` and `formatter` models.
+## What Changed This Session
 
-All prior backend work remains intact. 
+1. **`backend/tools/analytics_tools.py`**
+   - `yield_statistics` now returns `clean_statistics` (0-100% yield range only) alongside raw stats.
+   - `temperature_statistics` now returns `clean_statistics` (-100°C to 300°C range only) alongside raw stats.
+   - New `reagent_statistics` tool added — ranks reagents/solvents by occurrence from `reactions.reagents_json`.
+
+2. **`backend/tools/__init__.py`** — exports `reagent_statistics`.
+
+3. **`backend/planner/schema.py`** — `reagent_statistics` added to `TOOL_FILTER_SCHEMAS`.
+
+4. **`backend/planner/planner.py`** — `reagent_statistics` added to `_TOOL_DISPATCH`.
+
+5. **`backend/planner/prompts.py`** — Completely revised:
+   - 10 tools documented (was 9, now includes `reagent_statistics`).
+   - IMPORTANT NOTES section about NULL reaction_type prevalence and SMILES molecule names.
+   - 35+ worked few-shot examples (was 10).
+   - Comparison, ranking, natural language, and edge case patterns all covered.
+
+6. **`backend/chat/formatter.py`** — System prompt updated to prefer `clean_statistics` over raw stats when present.
+
+7. **`frontend/src/components/ChatStream.tsx`** — Empty state replaced with rich UI:
+   - 10 clickable suggestion chips dispatch queries immediately on click.
+   - Shows "2.4M reactions, 1.8M procedures, 2M molecules" stats.
+   - `onSuggestion` prop connects to `ChatInterface` → `sendMessage`.
+
+8. **`scripts/test_audit.py`** — New comprehensive test file with 45 assertions across all categories.
 
 ## Architecture (Current)
 
 ```
-Dataset  →  DuckDB  →  Tools  →  FastAPI (11 endpoints including /chat)
+Dataset  →  DuckDB  →  Tools (10 tools)  →  FastAPI (14 endpoints including /chat)
 
 Provider Layer
-  BaseProvider → OllamaProvider (live) / stubs
+  BaseProvider → OllamaProvider (live, configurable timeout) / stubs
 
 Planner Layer
   User question → Planner.plan(question) → JSON extraction → Tool dispatch → PlannerResult
+  10 tools: search_reactions, search_procedures, molecule_lookup, catalyst_statistics,
+            yield_statistics, temperature_statistics, source_dataset_statistics,
+            reaction_type_statistics, reagent_statistics, dataset_summary
 
 Chat Layer
   POST /chat (SSE Stream)
@@ -43,17 +59,38 @@ Chat Layer
     ↓
   emit: {type: "tool_selected", tool: "...", filters: {...}}
     ↓
-  run: format_response() (LLM summary call)
+  run: format_response() (LLM summary call with timeout)
     ↓
   emit: {type: "tool_result", result: {...raw...}, text: "...summary..."}
     ↓
   emit: {type: "done"}
 
-Frontend Layer (NEW)
+Frontend Layer
   Next.js 15 (App Router) → TailwindCSS + shadcn/ui
   Hook: useChatStream (manages POST /chat)
   Component: ChatInterface (glues everything)
+  Empty state: 10 suggestion chips → sendMessage
 ```
+
+## Critical Database Facts (MUST READ)
+
+> **99.97% of reactions have `reaction_type = NULL`**
+> - Only 750 reactions have a type label (all Buchwald-Hartwig variants)
+> - Searches for "Suzuki", "Heck", "amide coupling" by reaction_type return 0 results
+> - The planner handles this: uses catalyst/reactant filters instead for those reaction types
+> - This is an ORD dataset characteristic, not a system bug
+
+> **Yield data has extreme outliers** (values up to 9×10¹⁹%)
+> - Raw global average yield: ~92 trillion percent (meaningless)
+> - `clean_statistics` (0-100% range): avg=63.83%, med=68.30% ← **use this**
+
+> **Temperature data: 81% of records at or below 0°C** (likely default/unset values)
+> - Raw global median: 0°C (meaningless)
+> - `clean_statistics` (-100°C to 300°C): avg=13.63°C ← **use this**
+
+> **Molecule registry is SMILES-only** — no compound names
+> - Ethanol (CCO): 40,408. Acetone (CC(C)=O): 8,364. Benzene (c1ccccc1): 5,331.
+> - Caffeine/aspirin not in registry. Planner falls back to `search_procedures` text search.
 
 ## SSE Event Flow
 
@@ -77,6 +114,7 @@ python scripts/test_analytics_endpoints.py
 python scripts/test_providers.py
 python scripts/test_planner.py
 python scripts/test_chat_endpoint.py
+python scripts/test_audit.py          ← NEW: 45-assertion capability audit
 ```
 
 Inside `frontend/`:
@@ -94,6 +132,8 @@ Begin **Phase 5: Experiment comparison engine and file upload workflow**.
 1. **File Upload UI:** Add file upload capability (PDF, DOCX, TXT, CSV, JSON, XLSX) in the chat frontend.
 2. **Analysis Endpoint:** Create a new backend endpoint `POST /analyze` to process uploads.
 3. **Extraction & Comparison:** Connect the file upload to the planner or a specialized comparison pipeline.
+4. **Reagent analytics expansion:** Per-dataset reagent breakdown, most common solvents per reaction type.
+5. **Molecule name lookup:** Pre-seeded table mapping common names (ethanol, acetone, caffeine) to SMILES.
 
 ## Rules
 
@@ -103,3 +143,4 @@ Begin **Phase 5: Experiment comparison engine and file upload workflow**.
 - Read PROJECT_SPEC.md before making changes
 - Update PROJECT_STATE.md, TASKS.md, and AI_HANDOFF.md after major milestones
 - Do not introduce vector databases, LangGraph, or agent frameworks yet
+- Always use `clean_statistics` from yield/temperature when summarizing for users

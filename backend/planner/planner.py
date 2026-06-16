@@ -40,6 +40,7 @@ from backend.tools import (
     dataset_summary,
     molecule_lookup,
     reaction_type_statistics,
+    reagent_statistics,
     search_procedures,
     search_reactions,
     source_dataset_statistics,
@@ -71,6 +72,7 @@ _TOOL_DISPATCH: dict[str, Callable[..., dict[str, Any]]] = {
     "temperature_statistics": temperature_statistics,
     "source_dataset_statistics": source_dataset_statistics,
     "reaction_type_statistics": reaction_type_statistics,
+    "reagent_statistics": reagent_statistics,
     "dataset_summary": dataset_summary,
 }
 
@@ -185,7 +187,7 @@ class Planner:
     # Public API
     # ------------------------------------------------------------------
 
-    def plan(self, question: str, model: str | None = None) -> PlannerResult:
+    def plan(self, question: str, model: str | None = None, timeout: float | None = None) -> PlannerResult:
         """Run the planner pipeline for a single user question.
 
         Parameters
@@ -194,6 +196,8 @@ class Planner:
             Free-text question from the user.
         model:
             Optional override for the provider's default model.
+        timeout:
+            Timeout in seconds for the provider call.
 
         Returns
         -------
@@ -214,7 +218,7 @@ class Planner:
 
         for attempt in range(self._max_retries + 1):
             try:
-                chat_response = self._provider.chat(messages, model=model)
+                chat_response = self._provider.chat(messages, model=model, timeout=timeout)
                 raw_response = chat_response.content
             except Exception as exc:  # noqa: BLE001
                 return PlannerResult(
