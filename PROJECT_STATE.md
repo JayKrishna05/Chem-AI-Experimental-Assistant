@@ -4,7 +4,7 @@ Last Updated: 2026-06-16
 
 ## Current Phase
 
-Phase 3 — Planner + Provider Layer
+Phase 4 — Frontend Chat Interface
 
 ## Completed
 
@@ -28,11 +28,12 @@ Phase 3 — Planner + Provider Layer
 - Analytics API endpoints added to `backend/api/routes.py`
 - Analytics API endpoint tests added at `scripts/test_analytics_endpoints.py`
 - Analytics Pydantic models added to `backend/api/models.py`
-- `requirements.txt` updated: added `pydantic==2.11.7` and `httpx==0.28.1`
 - Provider abstraction layer implemented in `backend/providers/`
 - Provider tests added at `scripts/test_providers.py`
 - Planner layer implemented in `backend/planner/`
-- Planner tests added at `scripts/test_planner.py` — 43 tests, all passing
+- Planner tests added at `scripts/test_planner.py`
+- **POST /chat endpoint with SSE streaming** implemented in `backend/chat/` and `backend/api/chat_routes.py`
+- Chat endpoint smoke tests added at `scripts/test_chat_endpoint.py`
 
 Datasets:
 
@@ -52,49 +53,49 @@ FastAPI backend (all endpoints):
 - `GET /analytics/datasets`
 - `GET /analytics/reaction-types`
 - `GET /analytics/summary`
+- **`POST /chat`** (SSE streaming endpoint)
+
+Chat & Formatting Layer (`backend/chat/`):
+
+- `stream.py` — Orchestrates Planner -> LLM summary -> SSE event yielding.
+- `formatter.py` — LLM-powered response formatter that translates raw JSON output into a conversational summary.
+- Ensures absolute database-independence above the tool layer, enabling future pgvector/vss additions seamlessly.
 
 Provider abstraction layer (`backend/providers/`):
 
 - `base.py` — `BaseProvider` ABC, `Message`, `ChatResponse`, `GenerateResponse`
 - `config.py` — `ProviderConfig` dataclass, `load_config()` from `ORD_*` env vars
 - `ollama_provider.py` — live Ollama REST API implementation
-- `openai_provider.py`, `anthropic_provider.py`, `gemini_provider.py` — documented stubs
 - `provider_factory.py` — `get_provider()` registry factory
-- `__init__.py` — clean public exports
+- Stubs for OpenAI/Anthropic/Gemini.
 
 Planner layer (`backend/planner/`):
 
-- `prompts.py` — SYSTEM_PROMPT: full tool catalog, filter schemas, output format rules,
-  one worked few-shot example per tool (9 examples total)
-- `schema.py` — TOOL_FILTER_SCHEMAS, KNOWN_TOOLS, `validate_planner_call()`,
-  `PlannerValidationError`
-- `planner.py` — `Planner` class + `PlannerResult` dataclass:
-  - Builds prompt → calls LLM → extracts JSON (brace-balanced scanner)
-  - Validates with `validate_planner_call()` → dispatches to tool function
-  - One retry with a correction prompt on parse/validation failure
-  - Never raises — all failures are returned as `PlannerResult(success=False)`
-- `__init__.py` — public exports
+- `prompts.py` — SYSTEM_PROMPT: full tool catalog, filter schemas, output format rules, one worked few-shot example per tool (9 examples total).
+- `schema.py` — Strict `validate_planner_call()`.
+- `planner.py` — `Planner` class: builds prompt → LLM → JSON extraction → validation → tool dispatch.
 
 ## Current Focus
 
-- POST /chat endpoint with SSE streaming
+- Next.js chat interface (Phase 4)
 
 ## Next Milestones
 
-1. POST /chat FastAPI endpoint with SSE streaming
-2. Next.js chat interface (Phase 4)
+1. Initialize Next.js project.
+2. Build chat UI consuming the `POST /chat` SSE stream.
+3. Add specialized React cards for rendering `tool_result` data.
 
 ## Infrastructure Status
 
-Database: DuckDB created and populated
+Database: DuckDB created and populated. (Future compatibility with Postgres/pgvector documented and preserved).
 
-Backend: FastAPI retrieval and analytics API fully implemented
+Backend: FastAPI retrieval, analytics, and streaming chat API fully implemented.
 
-Providers: BaseProvider + OllamaProvider live, stubs for OpenAI/Anthropic/Gemini
+Providers: BaseProvider + OllamaProvider live, stubs for OpenAI/Anthropic/Gemini.
 
-Planner: Fully implemented — intent → DSL → validate → dispatch → result
+Planner: Fully implemented — intent → DSL → validate → dispatch → result.
 
-Frontend: Not Started
+Frontend: Not Started.
 
 ## Repository Status
 

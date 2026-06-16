@@ -34,28 +34,29 @@
   - [x] `planner.py` — `Planner` class + `PlannerResult`
   - [x] `__init__.py` — public exports
 - [x] Planner tests (`scripts/test_planner.py`)
+- [x] POST /chat endpoint with SSE streaming (`backend/chat/` + `backend/api/chat_routes.py`)
 
 ## Current
 
-- [ ] POST /chat endpoint with SSE streaming
+- [ ] Chat interface (Next.js)
 
 ## Next
 
-- [ ] Chat interface (Next.js)
-
-## Future
-
-- [ ] File upload analysis
+- [ ] File upload UI support
 - [ ] Experiment comparison
 - [ ] OpenAI provider (implement stub)
 - [ ] Anthropic provider (implement stub)
 - [ ] Gemini provider (implement stub)
 
+## Future
+
+- [ ] Semantic Search (pgvector or DuckDB VSS)
+- [ ] PostgreSQL migration for operational database
+
 ## Not Yet
 
 - [ ] Agents
 - [ ] LangGraph
-- [ ] Vector databases
 - [ ] Fine-tuning
 
 ## Repository Workflow

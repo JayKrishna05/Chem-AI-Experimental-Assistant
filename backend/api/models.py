@@ -13,6 +13,12 @@ class HealthResponse(BaseModel):
     database_available: bool
 
 
+class ChatRequest(BaseModel):
+    message: str
+    provider: str | None = None
+    model: str | None = None
+
+
 class ReactionSearchParams(BaseModel):
     reaction_id: str | None = None
     reaction_type: str | None = None
