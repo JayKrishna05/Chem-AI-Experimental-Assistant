@@ -23,14 +23,19 @@
 - [x] Analytics tools
 - [x] Analytics validation tests
 - [x] Analytics example outputs
+- [x] Analytics API endpoints (`/analytics/catalysts`, `/analytics/yields`, `/analytics/temperatures`, `/analytics/datasets`, `/analytics/reaction-types`, `/analytics/summary`)
+- [x] Analytics endpoint tests (`scripts/test_analytics_endpoints.py`)
+- [x] Fix `requirements.txt` — added `pydantic` and `httpx`
 
 ## Current
 
-- [ ] Ollama planner
+- [ ] Ollama provider abstraction (`backend/providers/`)
 
 ## Next
 
-- [ ] Chat interface
+- [ ] Planner (`backend/planner/planner.py`)
+- [ ] POST /chat endpoint with SSE streaming
+- [ ] Chat interface (Next.js)
 
 ## Future
 

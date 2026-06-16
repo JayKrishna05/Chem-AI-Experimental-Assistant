@@ -4,33 +4,16 @@ Date: 2026-06-16
 
 ## Current Status
 
-Foundation database work completed.
+Analytics API endpoint layer completed.
 
-Implemented:
+Implemented this milestone:
 
-- `scripts/validate_datasets.py`
-- `scripts/ingest_duckdb.py`
-- `backend/database/schema.sql`
-- `backend/database/ord.duckdb`
-- `requirements.txt`
-- `backend/tools/db.py`
-- `backend/tools/chemistry_tools.py`
-- `scripts/test_tool_layer.py`
-- `backend/api/main.py`
-- `backend/api/routes.py`
-- `backend/api/models.py`
-- `scripts/run_api.py`
-- `scripts/test_api_endpoints.py`
-- `backend/tools/analytics_tools.py`
-- `scripts/test_analytics_tools.py`
-- `scripts/example_analytics_outputs.py`
+- `backend/api/routes.py` — added six analytics endpoints
+- `backend/api/models.py` — added all analytics Pydantic request/response models
+- `scripts/test_analytics_endpoints.py` — 21 endpoint tests, all passing
+- `requirements.txt` — added `pydantic==2.11.7` and `httpx==0.28.1`
 
-Repository:
-
-- Git is initialized
-- Remote `origin`: https://github.com/JayKrishna05/Chem-AI-Experimental-Assistant
-- Milestone commits and pushes to `origin/main` are expected
-- Force pushes and history rewrites are not allowed
+All prior work remains intact.
 
 ## Existing Assets
 
@@ -46,119 +29,117 @@ Validated dataset counts:
 - Procedures: 1,788,170
 - Molecules: 1,993,180
 
-Validation findings:
-
-- Reactions: 24 JSONL shards, metadata and counted records match expected count
-- Procedures: 18 JSONL shards, metadata and counted records match expected count
-- Molecules: 1 JSONL file, metadata and counted records match expected count
-
 DuckDB database:
 
 - Path: `backend/database/ord.duckdb`
-- Tables:
-  - `reactions`
-  - `procedures`
-  - `molecules`
-  - `ingestion_audit`
-- Verified imported counts:
-  - `reactions`: 2,376,120
-  - `procedures`: 1,788,170
-  - `molecules`: 1,993,180
-- Chemistry arrays/objects are preserved as DuckDB `JSON` columns:
-  - `reactants_json`
-  - `reagents_json`
-  - `catalysts_json`
-  - `products_json`
-  - `conditions_json`
+- Tables: `reactions`, `procedures`, `molecules`, `ingestion_audit`
+- Verified imported counts match expected dataset counts
+- Chemistry arrays/objects preserved as DuckDB `JSON` columns
 
-Schema verification:
+## FastAPI Endpoints (Complete)
 
-- Verified live DuckDB tables: `reactions`, `procedures`, `molecules`, `ingestion_audit`
-- Verified row counts still match expected dataset counts
+Retrieval:
 
-Tool layer:
+- `GET /health`
+- `GET /reactions/search`
+- `GET /procedures/search`
+- `GET /molecules/search`
 
-- `search_reactions()` queries DuckDB directly and returns structured dictionaries with hydrated JSON chemistry fields
-- `search_procedures()` queries DuckDB directly and returns structured procedure rows
-- `molecule_lookup()` queries DuckDB directly and returns structured molecule rows
-- Smoke test command: `python scripts/test_tool_layer.py`
+Analytics:
 
-FastAPI backend:
+- `GET /analytics/catalysts` — catalyst_statistics(reaction_type, source_dataset, limit)
+- `GET /analytics/yields` — yield_statistics(reaction_type, source_dataset)
+- `GET /analytics/temperatures` — temperature_statistics(reaction_type, source_dataset)
+- `GET /analytics/datasets` — source_dataset_statistics(reaction_type, limit)
+- `GET /analytics/reaction-types` — reaction_type_statistics(source_dataset, limit)
+- `GET /analytics/summary` — dataset_summary()
 
-- App entrypoint: `backend.api.main:app`
-- Local startup command: `python scripts/run_api.py`
-- Endpoints:
-  - `GET /health`
-  - `GET /reactions/search`
-  - `GET /procedures/search`
-  - `GET /molecules/search`
-- Routes call the existing tool functions in `backend/tools/chemistry_tools.py`
-- Typed API models live in `backend/api/models.py`
-- Endpoint smoke test command: `python scripts/test_api_endpoints.py`
+All endpoints:
+- Delegate to the DuckDB tool layer without duplicating query logic
+- Use typed Pydantic request/response models from `backend/api/models.py`
+- Use the same `handle_tool_error()` pattern as retrieval routes
 
-Analytics tools:
+## Tool Layer (Complete)
 
-- `catalyst_statistics()` extracts catalyst entries from `reactions.catalysts_json`
-- `yield_statistics()` summarizes finite `procedures.yield_percent` values and reports yields below 0 or above 100
-- `temperature_statistics()` summarizes finite `procedures.temperature_c` values
-- `source_dataset_statistics()` aggregates reaction/procedure/yield/temperature coverage by source dataset
-- `reaction_type_statistics()` aggregates reaction/procedure/yield/temperature coverage by reaction type
-- `dataset_summary()` reports dataset counts plus chemistry/procedure coverage
-- Analytics assumptions are included in each returned payload
-- Validation command: `python scripts/test_analytics_tools.py`
-- Example output command: `python scripts/example_analytics_outputs.py`
+Retrieval (`backend/tools/chemistry_tools.py`):
 
-Analytics validation notes:
+- `search_reactions()` — scalar + JSON text filters
+- `search_procedures()` — text + numeric range filters
+- `molecule_lookup()` — exact SMILES or substring + occurrence threshold
 
-- Tests compare every analytics function against direct DuckDB SQL queries
-- Null and non-finite numeric values are excluded from yield and temperature numeric summaries
-- Non-finite temperature values remain visible through coverage counts
-- `yield_statistics(reaction_type="Suzuki")` returns zero matching procedure records in the current normalized dataset
+Analytics (`backend/tools/analytics_tools.py`):
+
+- `catalyst_statistics()` — catalyst ranking by reaction coverage
+- `yield_statistics()` — percentile summary + quality checks
+- `temperature_statistics()` — percentile summary
+- `source_dataset_statistics()` — per-dataset coverage report
+- `reaction_type_statistics()` — per-reaction-type coverage report
+- `dataset_summary()` — top-level counts and JSON coverage rates
+
+## Test Commands
+
+```
+python scripts/test_tool_layer.py
+python scripts/test_analytics_tools.py
+python scripts/test_api_endpoints.py
+python scripts/test_analytics_endpoints.py
+```
 
 ## Current Task
 
-Build the planner/provider layer.
+Build the provider/planner layer.
 
 Recommended next task:
 
-- Add provider abstraction stubs before wiring Ollama
-- Keep planner as explicit Planner + Tools, not autonomous agents
+- Create `backend/providers/` with:
+  - `base.py` — `BaseProvider` abstract class with `chat(messages, **kw)` and `generate(prompt, **kw)`
+  - `ollama_provider.py` — Ollama REST API implementation
+  - Stubs: `openai_provider.py`, `anthropic_provider.py`, `gemini_provider.py`
+- Provider selection should be configurable (environment variable or config file)
+- Do NOT hardcode Ollama directly into business logic
+- Keep planner as explicit Planner + Tools — not autonomous agents
 - Reuse existing DuckDB tool and analytics functions
 - Avoid UI, file uploads, vector databases, and agent frameworks until their phases
 
 ## Current Architecture
 
+```
 Dataset
 ↓
 DuckDB
 ↓
-Retrieval Tools
-↓
-Analytics Tools
-↓
-FastAPI
+Retrieval Tools          Analytics Tools
+↓                        ↓
+FastAPI  ─────────────────────────────
+  GET /reactions/search
+  GET /procedures/search
+  GET /molecules/search
+  GET /analytics/catalysts
+  GET /analytics/yields
+  GET /analytics/temperatures
+  GET /analytics/datasets
+  GET /analytics/reaction-types
+  GET /analytics/summary
+```
 
-Implemented Tools
+Not yet implemented:
 
-Retrieval:
-- search_reactions
-- search_procedures
-- molecule_lookup
+```
+providers/     (BaseProvider, OllamaProvider, stubs)
+planner/       (intent detection → JSON DSL → tool dispatch)
+POST /chat     (SSE streaming)
+frontend/      (Next.js)
+```
 
-Analytics:
-- catalyst_statistics
-- yield_statistics
-- temperature_statistics
-- reaction_type_statistics
-- source_dataset_statistics
-- dataset_summary
+## Known Data Notes
 
+- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records because normalized procedure reaction types in this dataset do not include "Suzuki". The planner must handle empty results gracefully and broaden filters when a specific reaction type returns nothing.
 
 ## Rules
 
 - Do not regenerate datasets
-- Use DuckDB
+- Use DuckDB for all data access
 - Preserve chemistry JSON structures
 - Read PROJECT_SPEC.md before making changes
-- Update PROJECT_STATE.md and TASKS.md after major milestones
+- Update PROJECT_STATE.md, TASKS.md, and AI_HANDOFF.md after major milestones
 - Do not introduce vector databases, LangGraph, or agent frameworks

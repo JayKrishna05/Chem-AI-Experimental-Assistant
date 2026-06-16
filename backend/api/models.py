@@ -94,3 +94,154 @@ class MoleculeSearchResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+# ---------------------------------------------------------------------------
+# Analytics models
+# ---------------------------------------------------------------------------
+
+
+class CatalystStatisticsParams(BaseModel):
+    reaction_type: str | None = None
+    source_dataset: str | None = None
+    limit: int = Field(default=10, ge=1, le=100)
+
+
+class CatalystResult(BaseModel):
+    catalyst_smiles: str
+    catalyst_name: str
+    catalyst_entry_count: int
+    reaction_count: int
+
+
+class CatalystStatisticsResponse(BaseModel):
+    tool: str
+    filters: dict[str, Any]
+    limit: int
+    count: int
+    results: list[CatalystResult]
+    assumptions: list[str]
+
+
+class YieldStatisticsParams(BaseModel):
+    reaction_type: str | None = None
+    source_dataset: str | None = None
+
+
+class NumericCoverage(BaseModel):
+    total_records: int
+    records_with_value: int
+    records_with_finite_value: int
+
+
+class NumericSummary(BaseModel):
+    count: int | None = None
+    average: float | None = None
+    median: float | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+    sample_stddev: float | None = None
+    p25: float | None = None
+    p75: float | None = None
+
+
+class YieldQualityChecks(BaseModel):
+    below_zero_count: int
+    above_hundred_count: int
+
+
+class YieldStatisticsResponse(BaseModel):
+    tool: str
+    filters: dict[str, Any]
+    metric: str
+    coverage: NumericCoverage
+    statistics: NumericSummary
+    assumptions: list[str]
+    quality_checks: YieldQualityChecks
+
+
+class TemperatureStatisticsParams(BaseModel):
+    reaction_type: str | None = None
+    source_dataset: str | None = None
+
+
+class TemperatureStatisticsResponse(BaseModel):
+    tool: str
+    filters: dict[str, Any]
+    metric: str
+    coverage: NumericCoverage
+    statistics: NumericSummary
+    assumptions: list[str]
+
+
+class SourceDatasetStatisticsParams(BaseModel):
+    reaction_type: str | None = None
+    limit: int = Field(default=10, ge=1, le=100)
+
+
+class DatasetCoverageResult(BaseModel):
+    source_dataset: str | None = None
+    reaction_count: int
+    procedure_count: int
+    yield_count: int
+    temperature_count: int
+
+
+class SourceDatasetStatisticsResponse(BaseModel):
+    tool: str
+    filters: dict[str, Any]
+    limit: int
+    count: int
+    results: list[DatasetCoverageResult]
+    assumptions: list[str]
+
+
+class ReactionTypeStatisticsParams(BaseModel):
+    source_dataset: str | None = None
+    limit: int = Field(default=10, ge=1, le=100)
+
+
+class ReactionTypeCoverageResult(BaseModel):
+    reaction_type: str | None = None
+    reaction_count: int
+    procedure_count: int
+    yield_count: int
+    temperature_count: int
+
+
+class ReactionTypeStatisticsResponse(BaseModel):
+    tool: str
+    filters: dict[str, Any]
+    limit: int
+    count: int
+    results: list[ReactionTypeCoverageResult]
+    assumptions: list[str]
+
+
+class DatasetCounts(BaseModel):
+    reaction_count: int
+    procedure_count: int
+    molecule_count: int
+    reaction_type_count: int
+    source_dataset_count: int
+
+
+class ReactionCoverage(BaseModel):
+    reactions_with_catalysts: int
+    reactions_with_products: int
+    reactions_with_reactants: int
+
+
+class ProcedureCoverage(BaseModel):
+    procedures_with_yield: int
+    procedures_with_finite_yield: int
+    procedures_with_temperature: int
+    procedures_with_finite_temperature: int
+
+
+class DatasetSummaryResponse(BaseModel):
+    tool: str
+    counts: DatasetCounts
+    reaction_coverage: ReactionCoverage
+    procedure_coverage: ProcedureCoverage
+    assumptions: list[str]

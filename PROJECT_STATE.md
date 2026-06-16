@@ -25,6 +25,10 @@ Foundation Setup
 - DuckDB-backed analytics tools implemented in `backend/tools/analytics_tools.py`
 - Analytics validation tests added at `scripts/test_analytics_tools.py`
 - Analytics example output script added at `scripts/example_analytics_outputs.py`
+- Analytics API endpoints added to `backend/api/routes.py`
+- Analytics API endpoint tests added at `scripts/test_analytics_endpoints.py`
+- Analytics Pydantic models added to `backend/api/models.py`
+- `requirements.txt` updated: added `pydantic==2.11.7` and `httpx==0.28.1`
 
 Datasets:
 
@@ -68,6 +72,12 @@ FastAPI backend:
 - `GET /reactions/search`
 - `GET /procedures/search`
 - `GET /molecules/search`
+- `GET /analytics/catalysts`
+- `GET /analytics/yields`
+- `GET /analytics/temperatures`
+- `GET /analytics/datasets`
+- `GET /analytics/reaction-types`
+- `GET /analytics/summary`
 - API routes call the existing DuckDB tool layer rather than duplicating query logic
 - Typed request and response models live in `backend/api/models.py`
 - Local startup: `python scripts/run_api.py`
@@ -90,20 +100,24 @@ Analytics tools:
 
 ## Next Milestones
 
-1. Ollama planner
-2. Chat interface
+1. Ollama provider abstraction (`backend/providers/`)
+2. Planner (`backend/planner/planner.py`)
+3. POST /chat endpoint with SSE streaming
+4. Chat interface (Next.js)
 
 ## Infrastructure Status
 
 Database: DuckDB created and populated
 
-Backend: FastAPI retrieval API implemented
+Backend: FastAPI retrieval and analytics API fully implemented
 
 Frontend: Not Started
 
 Planner: Not Started
 
-Analytics: DuckDB chemistry analytics implemented
+Providers: Not Started
+
+Analytics: DuckDB chemistry analytics implemented and exposed via HTTP
 
 ## Repository Status
 
