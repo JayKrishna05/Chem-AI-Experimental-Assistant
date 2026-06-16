@@ -17,6 +17,9 @@
 - [x] Procedure search tool
 - [x] Molecule lookup
 - [x] Tool layer smoke tests
+- [x] FastAPI backend retrieval layer
+- [x] API endpoint smoke tests
+- [x] Simple local API startup script
 
 ## Current
 
@@ -24,7 +27,6 @@
 
 ## Next
 
-- [ ] FastAPI backend
 - [ ] Ollama planner
 - [ ] Chat interface
 

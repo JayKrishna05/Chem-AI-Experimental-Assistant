@@ -19,6 +19,9 @@ Foundation Setup
 - DuckDB schema verified from the live database
 - DuckDB-backed tool layer implemented in `backend/tools/`
 - Smoke tests added at `scripts/test_tool_layer.py`
+- FastAPI backend layer implemented in `backend/api/`
+- API endpoint smoke tests added at `scripts/test_api_endpoints.py`
+- Local API startup script added at `scripts/run_api.py`
 
 Datasets:
 
@@ -56,6 +59,16 @@ Tool layer:
 - `search_procedures()` supports reaction filters, procedure text search, temperature bounds, and yield bounds
 - `molecule_lookup()` supports exact SMILES lookup, substring query, minimum occurrence filter, and result limiting
 
+FastAPI backend:
+
+- `GET /health`
+- `GET /reactions/search`
+- `GET /procedures/search`
+- `GET /molecules/search`
+- API routes call the existing DuckDB tool layer rather than duplicating query logic
+- Typed request and response models live in `backend/api/models.py`
+- Local startup: `python scripts/run_api.py`
+
 ## Current Focus
 
 - Build analytics tools on top of DuckDB
@@ -63,15 +76,14 @@ Tool layer:
 ## Next Milestones
 
 1. Analytics tools
-2. FastAPI backend
-3. Ollama planner
-4. Chat interface
+2. Ollama planner
+3. Chat interface
 
 ## Infrastructure Status
 
 Database: DuckDB created and populated
 
-Backend: Not Started
+Backend: FastAPI retrieval API implemented
 
 Frontend: Not Started
 

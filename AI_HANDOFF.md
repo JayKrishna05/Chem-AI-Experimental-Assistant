@@ -16,6 +16,11 @@ Implemented:
 - `backend/tools/db.py`
 - `backend/tools/chemistry_tools.py`
 - `scripts/test_tool_layer.py`
+- `backend/api/main.py`
+- `backend/api/routes.py`
+- `backend/api/models.py`
+- `scripts/run_api.py`
+- `scripts/test_api_endpoints.py`
 
 Repository:
 
@@ -74,6 +79,19 @@ Tool layer:
 - `search_procedures()` queries DuckDB directly and returns structured procedure rows
 - `molecule_lookup()` queries DuckDB directly and returns structured molecule rows
 - Smoke test command: `python scripts/test_tool_layer.py`
+
+FastAPI backend:
+
+- App entrypoint: `backend.api.main:app`
+- Local startup command: `python scripts/run_api.py`
+- Endpoints:
+  - `GET /health`
+  - `GET /reactions/search`
+  - `GET /procedures/search`
+  - `GET /molecules/search`
+- Routes call the existing tool functions in `backend/tools/chemistry_tools.py`
+- Typed API models live in `backend/api/models.py`
+- Endpoint smoke test command: `python scripts/test_api_endpoints.py`
 
 ## Current Task
 
