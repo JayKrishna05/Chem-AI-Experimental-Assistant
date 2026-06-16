@@ -31,19 +31,14 @@ Phase 3 — Planner + Provider Layer
 - `requirements.txt` updated: added `pydantic==2.11.7` and `httpx==0.28.1`
 - Provider abstraction layer implemented in `backend/providers/`
 - Provider tests added at `scripts/test_providers.py`
+- Planner layer implemented in `backend/planner/`
+- Planner tests added at `scripts/test_planner.py` — 43 tests, all passing
 
 Datasets:
 
 - Reactions: 2,376,120
 - Procedures: 1,788,170
 - Molecules: 1,993,180
-
-DuckDB import:
-
-- Database path: `backend/database/ord.duckdb`
-- Imported rows verified and match expected counts
-- Chemistry structures stored as DuckDB `JSON` columns
-- `ingestion_audit` records source paths, expected counts, and imported counts
 
 FastAPI backend (all endpoints):
 
@@ -58,45 +53,36 @@ FastAPI backend (all endpoints):
 - `GET /analytics/reaction-types`
 - `GET /analytics/summary`
 
-Provider abstraction layer:
+Provider abstraction layer (`backend/providers/`):
 
-- `backend/providers/base.py` — `BaseProvider` ABC, `Message`, `ChatResponse`, `GenerateResponse`
-- `backend/providers/config.py` — `ProviderConfig` dataclass, `load_config()` from `ORD_*` env vars
-- `backend/providers/ollama_provider.py` — live Ollama REST API implementation (stdlib urllib, no extra dep)
-- `backend/providers/openai_provider.py` — documented stub (raises `NotImplementedError`)
-- `backend/providers/anthropic_provider.py` — documented stub (raises `NotImplementedError`)
-- `backend/providers/gemini_provider.py` — documented stub (raises `NotImplementedError`)
-- `backend/providers/provider_factory.py` — `get_provider()` registry factory, `SUPPORTED_PROVIDERS`
-- `backend/providers/__init__.py` — clean public exports (concrete classes not re-exported)
+- `base.py` — `BaseProvider` ABC, `Message`, `ChatResponse`, `GenerateResponse`
+- `config.py` — `ProviderConfig` dataclass, `load_config()` from `ORD_*` env vars
+- `ollama_provider.py` — live Ollama REST API implementation
+- `openai_provider.py`, `anthropic_provider.py`, `gemini_provider.py` — documented stubs
+- `provider_factory.py` — `get_provider()` registry factory
+- `__init__.py` — clean public exports
 
-Configuration (environment variables):
+Planner layer (`backend/planner/`):
 
-- `ORD_PROVIDER` — active provider (`ollama` default)
-- `ORD_PLANNER_MODEL` — planner model (`qwen2.5:3b` default)
-- `ORD_ANALYSIS_MODEL` — analysis model (falls back to `ORD_PLANNER_MODEL`)
-- `ORD_OLLAMA_BASE_URL` — Ollama server URL (`http://localhost:11434` default)
-- `ORD_OPENAI_API_KEY` — OpenAI key (for future stub)
-- `ORD_ANTHROPIC_API_KEY` — Anthropic key (for future stub)
-- `ORD_GEMINI_API_KEY` — Gemini key (for future stub)
-
-Live integration test:
-
-- Ollama is running locally with `qwen2.5:3b`
-- All 27 provider tests pass (including live chat and generate round-trips)
-
-Analytics notes:
-
-- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records — normalized procedure reaction types in this dataset do not include Suzuki
+- `prompts.py` — SYSTEM_PROMPT: full tool catalog, filter schemas, output format rules,
+  one worked few-shot example per tool (9 examples total)
+- `schema.py` — TOOL_FILTER_SCHEMAS, KNOWN_TOOLS, `validate_planner_call()`,
+  `PlannerValidationError`
+- `planner.py` — `Planner` class + `PlannerResult` dataclass:
+  - Builds prompt → calls LLM → extracts JSON (brace-balanced scanner)
+  - Validates with `validate_planner_call()` → dispatches to tool function
+  - One retry with a correction prompt on parse/validation failure
+  - Never raises — all failures are returned as `PlannerResult(success=False)`
+- `__init__.py` — public exports
 
 ## Current Focus
 
-- Build the planner layer
+- POST /chat endpoint with SSE streaming
 
 ## Next Milestones
 
-1. Planner (`backend/planner/planner.py`)
-2. POST /chat endpoint with SSE streaming
-3. Chat interface (Next.js)
+1. POST /chat FastAPI endpoint with SSE streaming
+2. Next.js chat interface (Phase 4)
 
 ## Infrastructure Status
 
@@ -106,9 +92,9 @@ Backend: FastAPI retrieval and analytics API fully implemented
 
 Providers: BaseProvider + OllamaProvider live, stubs for OpenAI/Anthropic/Gemini
 
-Frontend: Not Started
+Planner: Fully implemented — intent → DSL → validate → dispatch → result
 
-Planner: Not Started
+Frontend: Not Started
 
 ## Repository Status
 

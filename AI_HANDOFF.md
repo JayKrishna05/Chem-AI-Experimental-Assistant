@@ -4,19 +4,15 @@ Date: 2026-06-16
 
 ## Current Status
 
-Provider abstraction layer completed.
+Planner layer completed.
 
 Implemented this milestone:
 
-- `backend/providers/base.py` — `BaseProvider` ABC, `Message`, `ChatResponse`, `GenerateResponse`
-- `backend/providers/config.py` — `ProviderConfig` dataclass + `load_config()` from env vars
-- `backend/providers/ollama_provider.py` — live Ollama REST API (stdlib urllib, no extra dep)
-- `backend/providers/openai_provider.py` — documented stub
-- `backend/providers/anthropic_provider.py` — documented stub
-- `backend/providers/gemini_provider.py` — documented stub
-- `backend/providers/provider_factory.py` — `get_provider()` + `SUPPORTED_PROVIDERS`
-- `backend/providers/__init__.py` — public exports
-- `scripts/test_providers.py` — 27 tests, all passing (incl. live Ollama round-trips)
+- `backend/planner/prompts.py` — SYSTEM_PROMPT with tool catalog + 9 few-shot examples
+- `backend/planner/schema.py` — per-tool filter schemas + `validate_planner_call()`
+- `backend/planner/planner.py` — `Planner` class + `PlannerResult` dataclass
+- `backend/planner/__init__.py` — public exports
+- `scripts/test_planner.py` — 43 tests, all passing
 
 All prior work remains intact.
 
@@ -24,83 +20,98 @@ All prior work remains intact.
 
 ```
 Dataset  →  DuckDB  →  Tools  →  FastAPI (10 endpoints)
-                                        ↑
-                                  Provider Layer (NEW)
-                                  BaseProvider
-                                  OllamaProvider (live)
-                                  OpenAIProvider (stub)
-                                  AnthropicProvider (stub)
-                                  GeminiProvider (stub)
-                                  provider_factory.get_provider()
+
+Provider Layer
+  BaseProvider → OllamaProvider (live) / stubs
+
+Planner Layer (NEW)
+  User question
+    ↓
+  Planner.plan(question)
+    ↓
+  LLM (via provider.chat)
+    ↓
+  JSON extraction (brace-balanced scanner)
+    ↓
+  validate_planner_call() — strict schema check
+    ↓
+  Tool dispatch (_TOOL_DISPATCH)
+    ↓
+  PlannerResult
 ```
 
 Not yet implemented:
 
 ```
-backend/planner/    ← NEXT
-POST /chat          ← after planner
-frontend/           ← Phase 4
+POST /chat      ← NEXT (SSE streaming)
+frontend/       ← Phase 4
 ```
 
-## Provider Layer
+## Planner Layer
 
 ### How to use
 
 ```python
-from backend.providers import get_provider, Message
+from backend.providers import get_provider
+from backend.planner import Planner
 
-provider = get_provider()           # reads ORD_PROVIDER env var
-response = provider.chat([
-    Message(role="system", content="You are a chemistry assistant."),
-    Message(role="user", content="What temperature does Buchwald-Hartwig typically run at?"),
-])
-print(response.content)
+planner = Planner(provider=get_provider())
+result = planner.plan("Which catalysts are most common in Buchwald-Hartwig reactions?")
+
+if result.success and not result.is_no_tool():
+    print(result.tool)          # "catalyst_statistics"
+    print(result.filters)       # {"reaction_type": "Buchwald-Hartwig"}
+    print(result.tool_result)   # {"tool": "catalyst_statistics", "results": [...], ...}
+elif result.is_no_tool():
+    print("No tool matched the question.")
+else:
+    print("Error:", result.error)
 ```
 
-### Configuration (env vars)
+### Files
 
-| Variable | Default | Description |
+| File | Purpose |
+|---|---|
+| `prompts.py` | `SYSTEM_PROMPT` — tool catalog, filter schemas, format rules, 9 few-shot examples |
+| `schema.py` | `TOOL_FILTER_SCHEMAS`, `KNOWN_TOOLS`, `validate_planner_call()`, `PlannerValidationError` |
+| `planner.py` | `Planner`, `PlannerResult`, `_TOOL_DISPATCH`, JSON extraction |
+| `__init__.py` | Public exports: `Planner`, `PlannerResult`, `KNOWN_TOOLS`, `NO_TOOL`, `PlannerValidationError` |
+
+### PlannerResult fields
+
+| Field | Type | Description |
 |---|---|---|
-| `ORD_PROVIDER` | `ollama` | Active provider |
-| `ORD_PLANNER_MODEL` | `qwen2.5:3b` | Model for intent/tool selection |
-| `ORD_ANALYSIS_MODEL` | ← planner_model | Model for summarisation (falls back) |
-| `ORD_OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama server URL |
-| `ORD_OPENAI_API_KEY` | — | OpenAI key (stub, not implemented) |
-| `ORD_ANTHROPIC_API_KEY` | — | Anthropic key (stub, not implemented) |
-| `ORD_GEMINI_API_KEY` | — | Gemini key (stub, not implemented) |
+| `success` | `bool` | True if a tool was called or `__none__` was returned |
+| `question` | `str` | Original user question |
+| `tool` | `str \| None` | Selected tool name (or `"__none__"` or `None` on error) |
+| `filters` | `dict` | Validated, coerced filter parameters |
+| `tool_result` | `dict \| None` | Raw return value from the tool function |
+| `raw_llm_response` | `str` | Full LLM text response (for debugging) |
+| `error` | `str \| None` | Human-readable error if `success=False` |
+| `retried` | `bool` | True if a retry was needed |
 
-### Key design decisions
+### Design decisions
 
-- Business logic must call `get_provider()` only — never import concrete classes
-- `OllamaProvider` uses Python stdlib `urllib` — no extra HTTP library needed
-- `stream=False` — responses arrive as a single JSON object (streaming is Phase 3 chat endpoint work)
-- Stubs raise `NotImplementedError` at call time; missing API keys raise `ValueError` at init time
-- Adding a new provider requires only one line in `_PROVIDER_REGISTRY` in `provider_factory.py`
+- One retry on parse/validation failure with an explicit correction prompt
+- JSON extraction uses a brace-balanced character scanner — handles nested `"filters": {}`
+- All 9 tools are in `_TOOL_DISPATCH`; an import-time check prevents drift
+- Planner never raises — all failures are `PlannerResult(success=False)`
+- `__none__` sentinel: the LLM outputs this when no tool fits the question
+
+### Available tools (KNOWN_TOOLS)
+
+```
+search_reactions        search_procedures       molecule_lookup
+catalyst_statistics     yield_statistics        temperature_statistics
+source_dataset_statistics  reaction_type_statistics  dataset_summary
+```
 
 ## FastAPI Endpoints (Complete)
 
-Retrieval:
-- `GET /health`
-- `GET /reactions/search`
-- `GET /procedures/search`
-- `GET /molecules/search`
+Retrieval: `GET /health`, `/reactions/search`, `/procedures/search`, `/molecules/search`
 
-Analytics:
-- `GET /analytics/catalysts`
-- `GET /analytics/yields`
-- `GET /analytics/temperatures`
-- `GET /analytics/datasets`
-- `GET /analytics/reaction-types`
-- `GET /analytics/summary`
-
-## Tool Layer (Complete)
-
-Retrieval (`backend/tools/chemistry_tools.py`):
-- `search_reactions()`, `search_procedures()`, `molecule_lookup()`
-
-Analytics (`backend/tools/analytics_tools.py`):
-- `catalyst_statistics()`, `yield_statistics()`, `temperature_statistics()`
-- `source_dataset_statistics()`, `reaction_type_statistics()`, `dataset_summary()`
+Analytics: `GET /analytics/catalysts`, `/analytics/yields`, `/analytics/temperatures`,
+`/analytics/datasets`, `/analytics/reaction-types`, `/analytics/summary`
 
 ## Test Commands
 
@@ -110,50 +121,84 @@ python scripts/test_analytics_tools.py
 python scripts/test_api_endpoints.py
 python scripts/test_analytics_endpoints.py
 python scripts/test_providers.py
+python scripts/test_planner.py
 ```
 
 ## Current Task
 
-Build the planner layer.
+Build `POST /chat` — the streaming chat endpoint.
 
 ### Recommended implementation
 
-Create `backend/planner/`:
+#### 1. FastAPI SSE chat endpoint (`backend/api/routes.py` or new `chat_routes.py`)
 
-- `planner.py` — `Planner` class:
-  - Takes a `BaseProvider` (for the planner model) and the tool registry
-  - Receives a user message string
-  - Sends a prompt to the LLM asking it to output a JSON DSL call
-  - Validates the JSON against the tool registry
-  - Dispatches to the appropriate tool function
-  - Returns the structured tool result
-
-- `prompts.py` — System prompts and few-shot examples for the planner
-
-- `__init__.py` — Public exports
-
-The JSON DSL format (from PROJECT_SPEC.md):
-```json
-{
-  "tool": "search_reactions",
-  "filters": {
-    "reaction_type": "Buchwald-Hartwig",
-    "yield_min": 80
-  }
-}
+```python
+POST /chat
+Body: {"message": str, "provider": str | None, "model": str | None}
+Response: text/event-stream (SSE)
 ```
 
-### Critical rules
+SSE event format:
+```
+data: {"type": "tool_selected", "tool": "search_reactions", "filters": {...}}
 
-- Planner + Tools only — no autonomous agents
-- The LLM output must be validated (parse JSON, check tool name) before dispatch
-- If the LLM output is not valid JSON, retry once then return an error
-- Reuse existing DuckDB tool and analytics functions directly
-- Do not add vector databases, LangGraph, or agent frameworks
+data: {"type": "tool_result", "result": {...}}
+
+data: {"type": "done"}
+```
+
+#### 2. Streaming flow
+
+```
+POST /chat
+  → Planner.plan(message)        [fast, ~1s]
+  → stream: tool_selected event
+  → stream: tool_result event    [contains raw tool data]
+  → stream: done event
+```
+
+The planner runs synchronously (it is already fast). The streaming is
+about keeping the client informed in real time, not about streaming
+token-by-token from the LLM (that is a Phase 5 enhancement).
+
+#### 3. Pydantic models needed
+
+```python
+class ChatRequest(BaseModel):
+    message: str
+    provider: str | None = None   # overrides ORD_PROVIDER env var
+    model: str | None = None      # overrides ORD_PLANNER_MODEL env var
+
+# Response is SSE — no Pydantic response model
+```
+
+#### 4. Error handling in SSE
+
+If the planner returns `success=False` or `is_no_tool()`:
+```
+data: {"type": "no_tool", "question": "...", "message": "I couldn't find a tool for that question."}
+
+data: {"type": "done"}
+```
+
+If a provider error occurs:
+```
+data: {"type": "error", "message": "LLM error: ..."}
+
+data: {"type": "done"}
+```
+
+#### 5. Critical rules
+
+- Still no agents, no multi-step planning
+- The planner runs once per chat message
+- FastAPI SSE uses `fastapi.responses.StreamingResponse` with `media_type="text/event-stream"`
+- Each SSE event is formatted as `data: <json>\n\n`
+- Add `POST /chat` smoke test to `scripts/test_chat_endpoint.py`
 
 ## Known Data Notes
 
-- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records — normalized procedure reaction types in this dataset do not include "Suzuki". The planner should handle empty results gracefully and broaden filters.
+- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records — normalized procedure reaction types in this dataset do not include "Suzuki". The planner handles this gracefully: `success=True`, `tool_result["count"] == 0`.
 
 ## Rules
 
