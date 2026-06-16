@@ -537,6 +537,16 @@ Phase 5
 
 ---
 
+### Database Independence
+
+The system currently uses DuckDB.
+
+Future deployments may use PostgreSQL and pgvector.
+
+Application layers above data access should remain database-agnostic.
+
+Planner, API, providers, and frontend components should not depend on DuckDB-specific features.
+
 # Project Memory
 
 The following files must be maintained throughout development:

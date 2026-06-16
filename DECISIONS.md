@@ -23,6 +23,30 @@ Implementation:
 - The ingestion script validates datasets before importing
 - Existing databases are not overwritten unless `--replace` is passed
 
+## Database Strategy
+
+Current database:
+
+- DuckDB
+
+Future compatibility:
+
+- PostgreSQL support is expected.
+- Future semantic search may use pgvector.
+
+Architecture requirement:
+
+- Business logic, planner logic, API contracts, and providers must not depend on a specific database implementation.
+
+Guideline:
+
+- New functionality should be implemented behind interfaces where practical.
+- Avoid embedding DuckDB-specific behavior outside the data access layer.
+
+Status:
+
+Approved
+
 ## Backend
 
 FastAPI
