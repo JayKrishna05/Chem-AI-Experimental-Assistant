@@ -13,6 +13,16 @@ Implemented:
 - `backend/database/schema.sql`
 - `backend/database/ord.duckdb`
 - `requirements.txt`
+- `backend/tools/db.py`
+- `backend/tools/chemistry_tools.py`
+- `scripts/test_tool_layer.py`
+
+Repository:
+
+- Git is initialized
+- Remote `origin`: https://github.com/JayKrishna05/Chem-AI-Experimental-Assistant
+- Milestone commits and pushes to `origin/main` are expected
+- Force pushes and history rewrites are not allowed
 
 ## Existing Assets
 
@@ -53,16 +63,28 @@ DuckDB database:
   - `products_json`
   - `conditions_json`
 
+Schema verification:
+
+- Verified live DuckDB tables: `reactions`, `procedures`, `molecules`, `ingestion_audit`
+- Verified row counts still match expected dataset counts
+
+Tool layer:
+
+- `search_reactions()` queries DuckDB directly and returns structured dictionaries with hydrated JSON chemistry fields
+- `search_procedures()` queries DuckDB directly and returns structured procedure rows
+- `molecule_lookup()` queries DuckDB directly and returns structured molecule rows
+- Smoke test command: `python scripts/test_tool_layer.py`
+
 ## Current Task
 
-Build DuckDB-backed retrieval tools.
+Build DuckDB-backed analytics tools.
 
 Recommended next task:
 
-- Implement `search_reactions()` against `backend/database/ord.duckdb`
-- Keep retrieval in DuckDB
-- Start with scalar filters (`reaction_type`, `source_dataset`)
-- Add JSON contains/search behavior for reactants, products, catalysts after the first simple path works
+- Implement `reaction_statistics()` against `backend/database/ord.duckdb`
+- Keep analytics queries in DuckDB
+- Start with reaction type, source dataset, temperature, and yield distributions
+- Avoid FastAPI, planner logic, UI, vector databases, and agent frameworks until their phases
 
 ## Rules
 

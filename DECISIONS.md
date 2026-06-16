@@ -81,3 +81,10 @@ DuckDB storage decision:
 - JSONL files are newline-delimited and can be streamed by DuckDB `read_json`
 - Procedure records are stored in a single `procedures` table using the fields specified in `PROJECT_SPEC.md`
 - Generated DuckDB files are rebuildable from the source JSONL datasets
+
+## Repository Workflow
+
+- Git is initialized in the project workspace
+- GitHub remote `origin` points to https://github.com/JayKrishna05/Chem-AI-Experimental-Assistant
+- Milestone commits and pushes to `origin/main` are expected
+- Force pushes and history rewrites are not allowed

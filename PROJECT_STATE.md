@@ -16,6 +16,9 @@ Foundation Setup
 - DuckDB schema created at `backend/database/schema.sql`
 - DuckDB ingestion pipeline created at `scripts/ingest_duckdb.py`
 - ORD datasets imported into `backend/database/ord.duckdb`
+- DuckDB schema verified from the live database
+- DuckDB-backed tool layer implemented in `backend/tools/`
+- Smoke tests added at `scripts/test_tool_layer.py`
 
 Datasets:
 
@@ -40,18 +43,29 @@ DuckDB import:
 - Chemistry structures are stored in DuckDB `JSON` columns
 - `ingestion_audit` records source paths, expected counts, and imported counts
 
+Schema verification:
+
+- Tables present: `reactions`, `procedures`, `molecules`, `ingestion_audit`
+- `reactions` JSON columns verified: `reactants_json`, `reagents_json`, `catalysts_json`, `products_json`, `conditions_json`
+- `procedures` scalar columns verified: `reaction_id`, `reaction_type`, `temperature_c`, `yield_percent`, `procedure_text`
+- `molecules` scalar columns verified: `smiles`, `occurrences`
+
+Tool layer:
+
+- `search_reactions()` supports scalar filters and JSON text filters for reactants, reagents, catalysts, and products
+- `search_procedures()` supports reaction filters, procedure text search, temperature bounds, and yield bounds
+- `molecule_lookup()` supports exact SMILES lookup, substring query, minimum occurrence filter, and result limiting
+
 ## Current Focus
 
-- Build first DuckDB-backed search tools
+- Build analytics tools on top of DuckDB
 
 ## Next Milestones
 
-1. Reaction search tool
-2. Procedure search tool
-3. Molecule lookup
-4. FastAPI backend
-5. Ollama planner
-6. Chat interface
+1. Analytics tools
+2. FastAPI backend
+3. Ollama planner
+4. Chat interface
 
 ## Infrastructure Status
 
@@ -64,3 +78,11 @@ Frontend: Not Started
 Planner: Not Started
 
 Analytics: Not Started
+
+## Repository Status
+
+- Git is initialized for this workspace
+- GitHub remote `origin` exists
+- Repository: https://github.com/JayKrishna05/Chem-AI-Experimental-Assistant
+- Milestone commits and pushes to `origin/main` are expected
+- Force pushes and history rewrites are not allowed
