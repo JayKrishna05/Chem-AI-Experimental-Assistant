@@ -136,6 +136,8 @@ IMPORTANT NOTES ABOUT THE DATABASE
 - For questions about palladium/copper/iron catalysts: use catalyst_statistics OR search_reactions with catalyst filter.
 - Comparison questions between reaction types should use reaction_type_statistics with appropriate sort_by.
 - Comparison questions about datasets should use source_dataset_statistics with appropriate sort_by.
+- For simple COUNT questions ("how many X exist?", "how many source datasets?", "total reactions"), ALWAYS use dataset_summary — NOT source_dataset_statistics.
+- dataset_summary answers: total reactions, procedures, molecules, source dataset count, and coverage stats.
 
 ---
 
@@ -242,6 +244,15 @@ Q: How many reactions exist?
 A: {"tool": "dataset_summary", "filters": {}}
 
 Q: How many molecules are in the database?
+A: {"tool": "dataset_summary", "filters": {}}
+
+Q: How many source datasets exist?
+A: {"tool": "dataset_summary", "filters": {}}
+
+Q: How many distinct datasets are there?
+A: {"tool": "dataset_summary", "filters": {}}
+
+Q: Total number of procedures
 A: {"tool": "dataset_summary", "filters": {}}
 
 Q: Show procedures mentioning palladium

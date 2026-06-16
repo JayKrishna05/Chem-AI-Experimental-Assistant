@@ -141,9 +141,9 @@ def validate_planner_call(raw: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         raise PlannerValidationError("Planner output is missing required key 'tool'")
 
     if "filters" not in raw:
-        raise PlannerValidationError(
-            "Planner output is missing required key 'filters'"
-        )
+        # Treat missing filters as empty filters — LLMs sometimes omit the key
+        # for tools that have no required filters.
+        raw = {**raw, "filters": {}}
 
     tool_name = raw["tool"]
     filters_raw = raw["filters"]
@@ -175,11 +175,11 @@ def validate_planner_call(raw: dict[str, Any]) -> tuple[str, dict[str, Any]]:
 
     for key, value in filters_raw.items():
         if key not in schema:
-            allowed = ", ".join(sorted(schema)) or "(none)"
-            raise PlannerValidationError(
-                f"Tool {tool_name!r} does not accept filter {key!r}.  "
-                f"Allowed: {allowed}"
-            )
+            # Silently discard unknown filters rather than failing the request.
+            # The LLM occasionally applies filters that don't exist on the chosen tool
+            # (e.g. sort_by on yield_statistics). Dropping them gracefully is better
+            # than surfacing a validation error to the user.
+            continue
 
         expected_type = schema[key]
 
@@ -188,9 +188,8 @@ def validate_planner_call(raw: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         try:
             coerced_value = _coerce(key, value, expected_type)
         except (TypeError, ValueError) as exc:
-            raise PlannerValidationError(
-                f"Filter {key!r} for tool {tool_name!r}: {exc}"
-            ) from exc
+            # Also drop filters that fail type coercion rather than crashing.
+            continue
 
         coerced[key] = coerced_value
 
