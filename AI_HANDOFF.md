@@ -126,6 +126,34 @@ Recommended next task:
 - Reuse existing DuckDB tool and analytics functions
 - Avoid UI, file uploads, vector databases, and agent frameworks until their phases
 
+## Current Architecture
+
+Dataset
+↓
+DuckDB
+↓
+Retrieval Tools
+↓
+Analytics Tools
+↓
+FastAPI
+
+Implemented Tools
+
+Retrieval:
+- search_reactions
+- search_procedures
+- molecule_lookup
+
+Analytics:
+- catalyst_statistics
+- yield_statistics
+- temperature_statistics
+- reaction_type_statistics
+- source_dataset_statistics
+- dataset_summary
+
+
 ## Rules
 
 - Do not regenerate datasets
