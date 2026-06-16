@@ -39,10 +39,13 @@ def stream_chat_events(request: ChatRequest) -> Iterator[str]:
     # 3. Emit tool_selected event
     yield f"data: {json.dumps({'type': 'tool_selected', 'tool': result.tool, 'filters': result.filters})}\n\n"
 
-    # 4. Generate natural language summary using the formatter
+    # 4. Emit formatting event
+    yield f"data: {json.dumps({'type': 'formatting'})}\n\n"
+
+    # 5. Generate natural language summary using the formatter
     summary_text = format_response(provider, result, model=request.model)
 
-    # 5. Emit tool_result containing raw payload and formatted text
+    # 6. Emit tool_result containing raw payload and formatted text
     yield f"data: {json.dumps({'type': 'tool_result', 'result': result.tool_result, 'text': summary_text})}\n\n"
 
     # 6. Emit done

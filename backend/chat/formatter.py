@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import concurrent.futures
 from typing import Any
 
 from backend.planner.planner import PlannerResult
@@ -13,6 +14,7 @@ def format_response(
     provider: BaseProvider,
     planner_result: PlannerResult,
     model: str | None = None,
+    timeout: float = 15.0,
 ) -> str:
     """Format a natural language response from a raw tool payload.
     
@@ -24,7 +26,14 @@ def format_response(
     if planner_result.is_no_tool():
         return "I couldn't find a tool to answer that specific question based on my capabilities."
 
-    tool_result = planner_result.tool_result or {}
+    raw_result = planner_result.tool_result or {}
+    tool_result = dict(raw_result)
+
+    # Truncate large lists to prevent context window overflow
+    for key, value in list(tool_result.items()):
+        if isinstance(value, list) and len(value) > 5:
+            tool_result[key] = value[:5]
+            tool_result[f"_{key}_note"] = f"Truncated from {len(value)} to 5 items for summarization."
 
     sys_prompt = (
         "You are an expert chemistry AI assistant. "
@@ -47,7 +56,11 @@ def format_response(
     ]
 
     try:
-        response = provider.chat(messages, model=model)
-        return response.content.strip()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(provider.chat, messages, model=model)
+            response = future.result(timeout=timeout)
+            return response.content.strip()
+    except concurrent.futures.TimeoutError:
+        return "The response formatting timed out."
     except Exception as exc:
         return f"Error formatting response: {exc}"

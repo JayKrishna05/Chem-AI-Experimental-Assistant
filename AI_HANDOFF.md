@@ -49,10 +49,11 @@ The frontend must handle these events from the `text/event-stream`:
 
 1. **`thinking`**: Emitted instantly to tell the UI the planner is evaluating the prompt.
 2. **`tool_selected`**: Contains `"tool"` and `"filters"`. UI should show "Searching database for X...".
-3. **`tool_result`**: Contains `"result"` (raw JSON from the tool) and `"text"` (LLM natural language summary). UI can render a data card + the text response.
-4. **`no_tool`**: Emitted if the planner couldn't match a tool. Contains `"message"`.
-5. **`error`**: Emitted if a tool or the LLM failed.
-6. **`done`**: Stream closure.
+3. **`formatting`**: Emitted instantly before calling the LLM formatter. UI should show "Formatting response...".
+4. **`tool_result`**: Contains `"result"` (raw JSON from the tool) and `"text"` (LLM natural language summary). UI can render a data card + the text response.
+5. **`no_tool`**: Emitted if the planner couldn't match a tool. Contains `"message"`.
+6. **`error`**: Emitted if a tool or the LLM failed.
+7. **`done`**: Stream closure.
 
 ## Test Commands
 

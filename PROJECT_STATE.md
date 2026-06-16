@@ -33,6 +33,7 @@ Phase 4 — Frontend Chat Interface
 - Planner layer implemented in `backend/planner/`
 - Planner tests added at `scripts/test_planner.py`
 - **POST /chat endpoint with SSE streaming** implemented in `backend/chat/` and `backend/api/chat_routes.py`
+- Chat endpoint robustness improvements (payload truncation, formatter timeout, `formatting` event) implemented
 - Chat endpoint smoke tests added at `scripts/test_chat_endpoint.py`
 
 Datasets:

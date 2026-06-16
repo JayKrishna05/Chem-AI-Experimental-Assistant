@@ -35,6 +35,7 @@
   - [x] `__init__.py` — public exports
 - [x] Planner tests (`scripts/test_planner.py`)
 - [x] POST /chat endpoint with SSE streaming (`backend/chat/` + `backend/api/chat_routes.py`)
+- [x] Chat robustness improvements (truncation, formatting event, timeouts)
 
 ## Current
 
