@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .db import connect_read_only
+from backend.utils import sanitize_json
 
 
 MAX_LIMIT = 100
@@ -113,7 +114,7 @@ def search_reactions(
             item[column] = _json_load(item[column])
         results.append(item)
 
-    return {
+    return sanitize_json({
         "tool": "search_reactions",
         "filters": {
             "reaction_id": reaction_id,
@@ -128,7 +129,8 @@ def search_reactions(
         "limit": row_limit,
         "count": len(results),
         "results": results,
-    }
+    })
+
 
 
 def search_procedures(
@@ -183,7 +185,7 @@ def search_procedures(
     columns, rows = _execute_structured_query(database_path, sql, params)
     results = [dict(zip(columns, row, strict=True)) for row in rows]
 
-    return {
+    return sanitize_json({
         "tool": "search_procedures",
         "filters": {
             "reaction_id": reaction_id,
@@ -197,7 +199,8 @@ def search_procedures(
         "limit": row_limit,
         "count": len(results),
         "results": results,
-    }
+    })
+
 
 
 def molecule_lookup(
@@ -236,7 +239,7 @@ def molecule_lookup(
     columns, rows = _execute_structured_query(database_path, sql, params)
     results = [dict(zip(columns, row, strict=True)) for row in rows]
 
-    return {
+    return sanitize_json({
         "tool": "molecule_lookup",
         "filters": {
             "smiles": smiles,
@@ -246,4 +249,4 @@ def molecule_lookup(
         "limit": row_limit,
         "count": len(results),
         "results": results,
-    }
+    })

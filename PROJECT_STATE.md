@@ -35,11 +35,11 @@ Phase 4 — Frontend Chat Interface
 - **POST /chat endpoint with SSE streaming** implemented in `backend/chat/` and `backend/api/chat_routes.py`
 - Chat endpoint robustness improvements (payload truncation, formatter timeout, `formatting` event) implemented
 - Chat endpoint smoke tests added at `scripts/test_chat_endpoint.py`
-
 - **Next.js 15 Frontend Chat Interface** completed with tailwindcss and shadcn/ui.
 - `useChatStream` hook implemented for parsing the SSE stream and managing state.
 - `ChatInterface`, `ChatStream`, `ChatMessage`, `ChatInput` components added.
 - `ToolResultCard` added to display raw JSON payloads seamlessly.
+- **Backend JSON Sanitization** implemented. `NaN` and `Infinity` from DuckDB analytics are recursively cleaned to `null` to ensure RFC-compliant JSON parsing on the frontend.
 
 Datasets:
 

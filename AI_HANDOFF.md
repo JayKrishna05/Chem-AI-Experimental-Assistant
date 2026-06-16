@@ -17,6 +17,7 @@ Implemented this milestone:
 - `frontend/src/components/ChatInput.tsx` — User input box.
 - `frontend/src/components/ToolResultCard.tsx` — Collapsible card for rendering `tool_result` structured JSON.
 - `frontend/src/components/StatusIndicator.tsx` — Loading indicators for `thinking`, `tool_selected`, and `formatting`.
+- `backend/utils.py` — `sanitize_json` utility created and applied to all DB retrieval and SSE outputs to convert `NaN` and `Infinity` into `null` (None), ensuring RFC-compliant JSON parsing on the frontend.
 
 All prior backend work remains intact. 
 

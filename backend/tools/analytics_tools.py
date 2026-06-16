@@ -9,6 +9,8 @@ from .chemistry_tools import DEFAULT_LIMIT, _like_pattern, _normalize_limit
 from .db import connect_read_only
 
 
+from backend.utils import sanitize_json
+
 def _fetch_one(
     database_path: str | Path | None,
     sql: str,
@@ -18,7 +20,9 @@ def _fetch_one(
         cursor = con.execute(sql, params or [])
         columns = [description[0] for description in cursor.description]
         row = cursor.fetchone()
-    return dict(zip(columns, row, strict=True)) if row else {}
+    if row:
+        return sanitize_json(dict(zip(columns, row, strict=True)))
+    return {}
 
 
 def _fetch_all(
@@ -30,7 +34,7 @@ def _fetch_all(
         cursor = con.execute(sql, params or [])
         columns = [description[0] for description in cursor.description]
         rows = cursor.fetchall()
-    return [dict(zip(columns, row, strict=True)) for row in rows]
+    return [sanitize_json(dict(zip(columns, row, strict=True))) for row in rows]
 
 
 def _reaction_filters(
