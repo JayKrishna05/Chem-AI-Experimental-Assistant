@@ -4,7 +4,7 @@ Last Updated: 2026-06-16
 
 ## Current Phase
 
-Foundation Setup
+Phase 3 — Planner + Provider Layer
 
 ## Completed
 
@@ -29,6 +29,8 @@ Foundation Setup
 - Analytics API endpoint tests added at `scripts/test_analytics_endpoints.py`
 - Analytics Pydantic models added to `backend/api/models.py`
 - `requirements.txt` updated: added `pydantic==2.11.7` and `httpx==0.28.1`
+- Provider abstraction layer implemented in `backend/providers/`
+- Provider tests added at `scripts/test_providers.py`
 
 Datasets:
 
@@ -36,37 +38,14 @@ Datasets:
 - Procedures: 1,788,170
 - Molecules: 1,993,180
 
-Validation findings:
-
-- `dataset/ord_jsonl_v1`: 24 JSONL shards, 2,376,120 counted records
-- `dataset/ord_procedures_v1`: 18 JSONL shards, 1,788,170 counted records
-- `dataset/molecule_registry_v1`: 1 JSONL file, 1,993,180 counted records
-- Metadata counts match expected counts for all datasets
-
 DuckDB import:
 
 - Database path: `backend/database/ord.duckdb`
-- Imported rows:
-  - `reactions`: 2,376,120
-  - `procedures`: 1,788,170
-  - `molecules`: 1,993,180
-- Chemistry structures are stored in DuckDB `JSON` columns
+- Imported rows verified and match expected counts
+- Chemistry structures stored as DuckDB `JSON` columns
 - `ingestion_audit` records source paths, expected counts, and imported counts
 
-Schema verification:
-
-- Tables present: `reactions`, `procedures`, `molecules`, `ingestion_audit`
-- `reactions` JSON columns verified: `reactants_json`, `reagents_json`, `catalysts_json`, `products_json`, `conditions_json`
-- `procedures` scalar columns verified: `reaction_id`, `reaction_type`, `temperature_c`, `yield_percent`, `procedure_text`
-- `molecules` scalar columns verified: `smiles`, `occurrences`
-
-Tool layer:
-
-- `search_reactions()` supports scalar filters and JSON text filters for reactants, reagents, catalysts, and products
-- `search_procedures()` supports reaction filters, procedure text search, temperature bounds, and yield bounds
-- `molecule_lookup()` supports exact SMILES lookup, substring query, minimum occurrence filter, and result limiting
-
-FastAPI backend:
+FastAPI backend (all endpoints):
 
 - `GET /health`
 - `GET /reactions/search`
@@ -78,32 +57,46 @@ FastAPI backend:
 - `GET /analytics/datasets`
 - `GET /analytics/reaction-types`
 - `GET /analytics/summary`
-- API routes call the existing DuckDB tool layer rather than duplicating query logic
-- Typed request and response models live in `backend/api/models.py`
-- Local startup: `python scripts/run_api.py`
 
-Analytics tools:
+Provider abstraction layer:
 
-- `catalyst_statistics()` ranks catalyst entries from `reactions.catalysts_json`
-- `yield_statistics()` summarizes finite `procedures.yield_percent` values and reports out-of-range yield counts
-- `temperature_statistics()` summarizes finite `procedures.temperature_c` values
-- `source_dataset_statistics()` reports reaction/procedure/yield/temperature coverage by source dataset
-- `reaction_type_statistics()` reports reaction/procedure/yield/temperature coverage by reaction type
-- `dataset_summary()` reports chemistry coverage and dataset-level counts
-- Each analytics function returns structured results with documented assumptions
-- Validation tests compare analytics outputs against direct DuckDB queries
-- `yield_statistics(reaction_type="Suzuki")` currently returns zero matching procedure records because the normalized procedure reaction types in this dataset do not include Suzuki
+- `backend/providers/base.py` — `BaseProvider` ABC, `Message`, `ChatResponse`, `GenerateResponse`
+- `backend/providers/config.py` — `ProviderConfig` dataclass, `load_config()` from `ORD_*` env vars
+- `backend/providers/ollama_provider.py` — live Ollama REST API implementation (stdlib urllib, no extra dep)
+- `backend/providers/openai_provider.py` — documented stub (raises `NotImplementedError`)
+- `backend/providers/anthropic_provider.py` — documented stub (raises `NotImplementedError`)
+- `backend/providers/gemini_provider.py` — documented stub (raises `NotImplementedError`)
+- `backend/providers/provider_factory.py` — `get_provider()` registry factory, `SUPPORTED_PROVIDERS`
+- `backend/providers/__init__.py` — clean public exports (concrete classes not re-exported)
+
+Configuration (environment variables):
+
+- `ORD_PROVIDER` — active provider (`ollama` default)
+- `ORD_PLANNER_MODEL` — planner model (`qwen2.5:3b` default)
+- `ORD_ANALYSIS_MODEL` — analysis model (falls back to `ORD_PLANNER_MODEL`)
+- `ORD_OLLAMA_BASE_URL` — Ollama server URL (`http://localhost:11434` default)
+- `ORD_OPENAI_API_KEY` — OpenAI key (for future stub)
+- `ORD_ANTHROPIC_API_KEY` — Anthropic key (for future stub)
+- `ORD_GEMINI_API_KEY` — Gemini key (for future stub)
+
+Live integration test:
+
+- Ollama is running locally with `qwen2.5:3b`
+- All 27 provider tests pass (including live chat and generate round-trips)
+
+Analytics notes:
+
+- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records — normalized procedure reaction types in this dataset do not include Suzuki
 
 ## Current Focus
 
-- Prepare planner/provider layer while keeping tool execution explicit and DuckDB-backed
+- Build the planner layer
 
 ## Next Milestones
 
-1. Ollama provider abstraction (`backend/providers/`)
-2. Planner (`backend/planner/planner.py`)
-3. POST /chat endpoint with SSE streaming
-4. Chat interface (Next.js)
+1. Planner (`backend/planner/planner.py`)
+2. POST /chat endpoint with SSE streaming
+3. Chat interface (Next.js)
 
 ## Infrastructure Status
 
@@ -111,13 +104,11 @@ Database: DuckDB created and populated
 
 Backend: FastAPI retrieval and analytics API fully implemented
 
+Providers: BaseProvider + OllamaProvider live, stubs for OpenAI/Anthropic/Gemini
+
 Frontend: Not Started
 
 Planner: Not Started
-
-Providers: Not Started
-
-Analytics: DuckDB chemistry analytics implemented and exposed via HTTP
 
 ## Repository Status
 

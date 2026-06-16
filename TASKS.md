@@ -26,14 +26,23 @@
 - [x] Analytics API endpoints (`/analytics/catalysts`, `/analytics/yields`, `/analytics/temperatures`, `/analytics/datasets`, `/analytics/reaction-types`, `/analytics/summary`)
 - [x] Analytics endpoint tests (`scripts/test_analytics_endpoints.py`)
 - [x] Fix `requirements.txt` — added `pydantic` and `httpx`
+- [x] Provider abstraction layer (`backend/providers/`)
+  - [x] `base.py` — `BaseProvider` abstract class with `Message`, `ChatResponse`, `GenerateResponse`
+  - [x] `config.py` — `ProviderConfig` dataclass + `load_config()` from env vars
+  - [x] `ollama_provider.py` — live Ollama REST API implementation
+  - [x] `openai_provider.py` — documented stub
+  - [x] `anthropic_provider.py` — documented stub
+  - [x] `gemini_provider.py` — documented stub
+  - [x] `provider_factory.py` — `get_provider()` registry-based factory
+  - [x] `__init__.py` — clean public API exports
+- [x] Provider tests (`scripts/test_providers.py`)
 
 ## Current
 
-- [ ] Ollama provider abstraction (`backend/providers/`)
+- [ ] Planner (`backend/planner/planner.py`)
 
 ## Next
 
-- [ ] Planner (`backend/planner/planner.py`)
 - [ ] POST /chat endpoint with SSE streaming
 - [ ] Chat interface (Next.js)
 
@@ -41,9 +50,9 @@
 
 - [ ] File upload analysis
 - [ ] Experiment comparison
-- [ ] OpenAI provider
-- [ ] Anthropic provider
-- [ ] Gemini provider
+- [ ] OpenAI provider (implement stub)
+- [ ] Anthropic provider (implement stub)
+- [ ] Gemini provider (implement stub)
 
 ## Not Yet
 

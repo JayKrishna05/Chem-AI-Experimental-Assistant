@@ -4,77 +4,103 @@ Date: 2026-06-16
 
 ## Current Status
 
-Analytics API endpoint layer completed.
+Provider abstraction layer completed.
 
 Implemented this milestone:
 
-- `backend/api/routes.py` — added six analytics endpoints
-- `backend/api/models.py` — added all analytics Pydantic request/response models
-- `scripts/test_analytics_endpoints.py` — 21 endpoint tests, all passing
-- `requirements.txt` — added `pydantic==2.11.7` and `httpx==0.28.1`
+- `backend/providers/base.py` — `BaseProvider` ABC, `Message`, `ChatResponse`, `GenerateResponse`
+- `backend/providers/config.py` — `ProviderConfig` dataclass + `load_config()` from env vars
+- `backend/providers/ollama_provider.py` — live Ollama REST API (stdlib urllib, no extra dep)
+- `backend/providers/openai_provider.py` — documented stub
+- `backend/providers/anthropic_provider.py` — documented stub
+- `backend/providers/gemini_provider.py` — documented stub
+- `backend/providers/provider_factory.py` — `get_provider()` + `SUPPORTED_PROVIDERS`
+- `backend/providers/__init__.py` — public exports
+- `scripts/test_providers.py` — 27 tests, all passing (incl. live Ollama round-trips)
 
 All prior work remains intact.
 
-## Existing Assets
+## Architecture (Current)
 
-Dataset locations:
+```
+Dataset  →  DuckDB  →  Tools  →  FastAPI (10 endpoints)
+                                        ↑
+                                  Provider Layer (NEW)
+                                  BaseProvider
+                                  OllamaProvider (live)
+                                  OpenAIProvider (stub)
+                                  AnthropicProvider (stub)
+                                  GeminiProvider (stub)
+                                  provider_factory.get_provider()
+```
 
-- dataset/ord_jsonl_v1
-- dataset/ord_procedures_v1
-- dataset/molecule_registry_v1
+Not yet implemented:
 
-Validated dataset counts:
+```
+backend/planner/    ← NEXT
+POST /chat          ← after planner
+frontend/           ← Phase 4
+```
 
-- Reactions: 2,376,120
-- Procedures: 1,788,170
-- Molecules: 1,993,180
+## Provider Layer
 
-DuckDB database:
+### How to use
 
-- Path: `backend/database/ord.duckdb`
-- Tables: `reactions`, `procedures`, `molecules`, `ingestion_audit`
-- Verified imported counts match expected dataset counts
-- Chemistry arrays/objects preserved as DuckDB `JSON` columns
+```python
+from backend.providers import get_provider, Message
+
+provider = get_provider()           # reads ORD_PROVIDER env var
+response = provider.chat([
+    Message(role="system", content="You are a chemistry assistant."),
+    Message(role="user", content="What temperature does Buchwald-Hartwig typically run at?"),
+])
+print(response.content)
+```
+
+### Configuration (env vars)
+
+| Variable | Default | Description |
+|---|---|---|
+| `ORD_PROVIDER` | `ollama` | Active provider |
+| `ORD_PLANNER_MODEL` | `qwen2.5:3b` | Model for intent/tool selection |
+| `ORD_ANALYSIS_MODEL` | ← planner_model | Model for summarisation (falls back) |
+| `ORD_OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama server URL |
+| `ORD_OPENAI_API_KEY` | — | OpenAI key (stub, not implemented) |
+| `ORD_ANTHROPIC_API_KEY` | — | Anthropic key (stub, not implemented) |
+| `ORD_GEMINI_API_KEY` | — | Gemini key (stub, not implemented) |
+
+### Key design decisions
+
+- Business logic must call `get_provider()` only — never import concrete classes
+- `OllamaProvider` uses Python stdlib `urllib` — no extra HTTP library needed
+- `stream=False` — responses arrive as a single JSON object (streaming is Phase 3 chat endpoint work)
+- Stubs raise `NotImplementedError` at call time; missing API keys raise `ValueError` at init time
+- Adding a new provider requires only one line in `_PROVIDER_REGISTRY` in `provider_factory.py`
 
 ## FastAPI Endpoints (Complete)
 
 Retrieval:
-
 - `GET /health`
 - `GET /reactions/search`
 - `GET /procedures/search`
 - `GET /molecules/search`
 
 Analytics:
-
-- `GET /analytics/catalysts` — catalyst_statistics(reaction_type, source_dataset, limit)
-- `GET /analytics/yields` — yield_statistics(reaction_type, source_dataset)
-- `GET /analytics/temperatures` — temperature_statistics(reaction_type, source_dataset)
-- `GET /analytics/datasets` — source_dataset_statistics(reaction_type, limit)
-- `GET /analytics/reaction-types` — reaction_type_statistics(source_dataset, limit)
-- `GET /analytics/summary` — dataset_summary()
-
-All endpoints:
-- Delegate to the DuckDB tool layer without duplicating query logic
-- Use typed Pydantic request/response models from `backend/api/models.py`
-- Use the same `handle_tool_error()` pattern as retrieval routes
+- `GET /analytics/catalysts`
+- `GET /analytics/yields`
+- `GET /analytics/temperatures`
+- `GET /analytics/datasets`
+- `GET /analytics/reaction-types`
+- `GET /analytics/summary`
 
 ## Tool Layer (Complete)
 
 Retrieval (`backend/tools/chemistry_tools.py`):
-
-- `search_reactions()` — scalar + JSON text filters
-- `search_procedures()` — text + numeric range filters
-- `molecule_lookup()` — exact SMILES or substring + occurrence threshold
+- `search_reactions()`, `search_procedures()`, `molecule_lookup()`
 
 Analytics (`backend/tools/analytics_tools.py`):
-
-- `catalyst_statistics()` — catalyst ranking by reaction coverage
-- `yield_statistics()` — percentile summary + quality checks
-- `temperature_statistics()` — percentile summary
-- `source_dataset_statistics()` — per-dataset coverage report
-- `reaction_type_statistics()` — per-reaction-type coverage report
-- `dataset_summary()` — top-level counts and JSON coverage rates
+- `catalyst_statistics()`, `yield_statistics()`, `temperature_statistics()`
+- `source_dataset_statistics()`, `reaction_type_statistics()`, `dataset_summary()`
 
 ## Test Commands
 
@@ -83,57 +109,51 @@ python scripts/test_tool_layer.py
 python scripts/test_analytics_tools.py
 python scripts/test_api_endpoints.py
 python scripts/test_analytics_endpoints.py
+python scripts/test_providers.py
 ```
 
 ## Current Task
 
-Build the provider/planner layer.
+Build the planner layer.
 
-Recommended next task:
+### Recommended implementation
 
-- Create `backend/providers/` with:
-  - `base.py` — `BaseProvider` abstract class with `chat(messages, **kw)` and `generate(prompt, **kw)`
-  - `ollama_provider.py` — Ollama REST API implementation
-  - Stubs: `openai_provider.py`, `anthropic_provider.py`, `gemini_provider.py`
-- Provider selection should be configurable (environment variable or config file)
-- Do NOT hardcode Ollama directly into business logic
-- Keep planner as explicit Planner + Tools — not autonomous agents
-- Reuse existing DuckDB tool and analytics functions
-- Avoid UI, file uploads, vector databases, and agent frameworks until their phases
+Create `backend/planner/`:
 
-## Current Architecture
+- `planner.py` — `Planner` class:
+  - Takes a `BaseProvider` (for the planner model) and the tool registry
+  - Receives a user message string
+  - Sends a prompt to the LLM asking it to output a JSON DSL call
+  - Validates the JSON against the tool registry
+  - Dispatches to the appropriate tool function
+  - Returns the structured tool result
 
-```
-Dataset
-↓
-DuckDB
-↓
-Retrieval Tools          Analytics Tools
-↓                        ↓
-FastAPI  ─────────────────────────────
-  GET /reactions/search
-  GET /procedures/search
-  GET /molecules/search
-  GET /analytics/catalysts
-  GET /analytics/yields
-  GET /analytics/temperatures
-  GET /analytics/datasets
-  GET /analytics/reaction-types
-  GET /analytics/summary
+- `prompts.py` — System prompts and few-shot examples for the planner
+
+- `__init__.py` — Public exports
+
+The JSON DSL format (from PROJECT_SPEC.md):
+```json
+{
+  "tool": "search_reactions",
+  "filters": {
+    "reaction_type": "Buchwald-Hartwig",
+    "yield_min": 80
+  }
+}
 ```
 
-Not yet implemented:
+### Critical rules
 
-```
-providers/     (BaseProvider, OllamaProvider, stubs)
-planner/       (intent detection → JSON DSL → tool dispatch)
-POST /chat     (SSE streaming)
-frontend/      (Next.js)
-```
+- Planner + Tools only — no autonomous agents
+- The LLM output must be validated (parse JSON, check tool name) before dispatch
+- If the LLM output is not valid JSON, retry once then return an error
+- Reuse existing DuckDB tool and analytics functions directly
+- Do not add vector databases, LangGraph, or agent frameworks
 
 ## Known Data Notes
 
-- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records because normalized procedure reaction types in this dataset do not include "Suzuki". The planner must handle empty results gracefully and broaden filters when a specific reaction type returns nothing.
+- `yield_statistics(reaction_type="Suzuki")` returns zero procedure records — normalized procedure reaction types in this dataset do not include "Suzuki". The planner should handle empty results gracefully and broaden filters.
 
 ## Rules
 
