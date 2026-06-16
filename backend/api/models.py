@@ -17,6 +17,21 @@ class ChatRequest(BaseModel):
     message: str
     provider: str | None = None
     model: str | None = None
+    formatter_model: str | None = None
+
+
+class ModelListResponse(BaseModel):
+    models: list[str]
+
+
+class CurrentModelsResponse(BaseModel):
+    planner_model: str
+    formatter_model: str
+
+
+class SetModelsRequest(BaseModel):
+    planner_model: str | None = None
+    formatter_model: str | None = None
 
 
 class ReactionSearchParams(BaseModel):

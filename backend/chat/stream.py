@@ -27,7 +27,7 @@ def stream_chat_events(request: ChatRequest) -> Iterator[str]:
     yield emit({'type': 'thinking'})
 
     # 2. Run the planner (synchronous)
-    result = planner.plan(request.message)
+    result = planner.plan(request.message, model=request.model)
 
     if not result.success:
         yield emit({'type': 'error', 'message': result.error})
@@ -47,7 +47,7 @@ def stream_chat_events(request: ChatRequest) -> Iterator[str]:
     yield emit({'type': 'formatting'})
 
     # 5. Generate natural language summary using the formatter
-    summary_text = format_response(provider, result, model=request.model)
+    summary_text = format_response(provider, result, model=request.formatter_model)
 
     # 6. Emit tool_result containing raw payload and formatted text
     yield emit({'type': 'tool_result', 'result': result.tool_result, 'text': summary_text})

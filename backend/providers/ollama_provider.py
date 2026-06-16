@@ -18,7 +18,7 @@ Pass a :class:`~backend.providers.config.ProviderConfig` (or supply
 ``base_url`` and ``default_model`` directly) to override defaults.
 
 Default base URL: ``http://localhost:11434``
-Default model:    ``qwen2.5:3b``
+Default model:    ``gemma4:12b-it-qat``
 """
 
 from __future__ import annotations
@@ -34,6 +34,7 @@ from .config import ProviderConfig, load_config
 
 _CHAT_PATH = "/api/chat"
 _GENERATE_PATH = "/api/generate"
+_TAGS_PATH = "/api/tags"
 _CONNECT_TIMEOUT_S = 10
 
 
@@ -174,6 +175,17 @@ class OllamaProvider(BaseProvider):
             provider=self.provider_name,
             raw=raw,
         )
+
+    def list_models(self) -> list[str]:
+        """Fetch available models from Ollama's /api/tags endpoint."""
+        try:
+            req = Request(self._base_url + _TAGS_PATH, method="GET")
+            with urlopen(req, timeout=self._timeout) as resp:
+                data = json.loads(resp.read())
+            return [m["name"] for m in data.get("models", [])]
+        except Exception:
+            # Fallback if offline or parsing fails
+            return [self._default_model] if self._default_model else []
 
     # ------------------------------------------------------------------
     # Connectivity helper

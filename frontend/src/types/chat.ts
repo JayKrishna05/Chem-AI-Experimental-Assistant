@@ -2,6 +2,15 @@ export type ChatRole = "user" | "assistant";
 
 export type AssistantStatus = "thinking" | "tool_selected" | "formatting" | "tool_result" | "done" | "error" | "no_tool" | "idle";
 
+export interface ModelsResponse {
+  models: string[];
+}
+
+export interface CurrentModelsResponse {
+  planner_model: string;
+  formatter_model: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatRole;

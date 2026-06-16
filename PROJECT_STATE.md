@@ -40,6 +40,9 @@ Phase 4 — Frontend Chat Interface
 - `ChatInterface`, `ChatStream`, `ChatMessage`, `ChatInput` components added.
 - `ToolResultCard` added to display raw JSON payloads seamlessly.
 - **Backend JSON Sanitization** implemented. `NaN` and `Infinity` from DuckDB analytics are recursively cleaned to `null` to ensure RFC-compliant JSON parsing on the frontend.
+- **Model Management**: Added `GET /models`, `GET /models/current`, and `POST /models/current` to allow dynamic model selection. 
+- **Frontend Model Switcher**: Added Planner and Formatter model dropdowns directly into `ChatInterface.tsx` header for rapid testing.
+- **Pre-Phase 5 QA Testing**: Executed extensive E2E QA covering edge cases: empty/large results, timeouts, concurrent requests, prompt truncation, abort signals, and invalid LLM JSON payloads. All passed securely.
 
 Datasets:
 

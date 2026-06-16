@@ -18,6 +18,8 @@ Implemented this milestone:
 - `frontend/src/components/ToolResultCard.tsx` — Collapsible card for rendering `tool_result` structured JSON.
 - `frontend/src/components/StatusIndicator.tsx` — Loading indicators for `thinking`, `tool_selected`, and `formatting`.
 - `backend/utils.py` — `sanitize_json` utility created and applied to all DB retrieval and SSE outputs to convert `NaN` and `Infinity` into `null` (None), ensuring RFC-compliant JSON parsing on the frontend.
+- **Model Management**: Added model retrieval API (`GET /models`, `GET /models/current`, `POST /models/current`) and global `active_models` state in `backend/api/state.py`.
+- **Frontend Model Switcher**: Added `useModels.ts` hook and modified `ChatInterface.tsx` to include dropdown selectors for dynamic switching of both the `planner` and `formatter` models.
 
 All prior backend work remains intact. 
 

@@ -185,13 +185,15 @@ class Planner:
     # Public API
     # ------------------------------------------------------------------
 
-    def plan(self, question: str) -> PlannerResult:
+    def plan(self, question: str, model: str | None = None) -> PlannerResult:
         """Run the planner pipeline for a single user question.
 
         Parameters
         ----------
         question:
             Free-text question from the user.
+        model:
+            Optional override for the provider's default model.
 
         Returns
         -------
@@ -212,7 +214,7 @@ class Planner:
 
         for attempt in range(self._max_retries + 1):
             try:
-                chat_response = self._provider.chat(messages)
+                chat_response = self._provider.chat(messages, model=model)
                 raw_response = chat_response.content
             except Exception as exc:  # noqa: BLE001
                 return PlannerResult(

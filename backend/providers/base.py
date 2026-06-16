@@ -158,5 +158,9 @@ class BaseProvider(ABC):
             ``provider`` fields.
         """
 
+    @abstractmethod
+    def list_models(self) -> list[str]:
+        """Return a list of available model names for this provider."""
+
     def __repr__(self) -> str:
         return f"{type(self).__name__}(provider_name={self.provider_name!r})"
