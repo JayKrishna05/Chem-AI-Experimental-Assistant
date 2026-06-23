@@ -131,6 +131,23 @@ def catalyst_statistics(
     where_clauses, params = _reaction_filters(reaction_type, source_dataset)
     where_clauses.append("json_array_length(r.catalysts_json) > 0")
     where_sql = _where_sql(where_clauses)
+    count_res = _fetch_one(
+        database_path,
+        f"""
+        SELECT COUNT(*) as c FROM (
+            SELECT 1
+            FROM reactions AS r, json_each(r.catalysts_json) AS c
+            {where_sql}
+            GROUP BY COALESCE(json_extract_string(c.value, '$.smiles'), ''),
+                     COALESCE(json_extract_string(c.value, '$.name'), '')
+            HAVING COALESCE(json_extract_string(c.value, '$.smiles'), '') <> '' OR
+                   COALESCE(json_extract_string(c.value, '$.name'), '') <> ''
+        )
+        """,
+        params,
+    )
+    total_matching_rows = count_res["c"] if count_res else 0
+
     params.append(row_limit)
 
     results = _fetch_all(
@@ -151,6 +168,7 @@ def catalyst_statistics(
         params,
     )
 
+    returned_rows = len(results)
     return {
         "tool": "catalyst_statistics",
         "filters": {
@@ -158,7 +176,9 @@ def catalyst_statistics(
             "source_dataset": source_dataset,
         },
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
         "assumptions": [
             "Catalysts are extracted from reactions.catalysts_json.",
@@ -313,6 +333,17 @@ def source_dataset_statistics(
     
     where_clauses, params = _reaction_filters(reaction_type=reaction_type)
     where_sql = _where_sql(where_clauses)
+    count_res = _fetch_one(
+        database_path,
+        f"""
+        SELECT COUNT(DISTINCT r.source_dataset) as c
+        FROM reactions AS r
+        {where_sql}
+        """,
+        params,
+    )
+    total_matching_rows = count_res["c"] if count_res else 0
+
     params.append(row_limit)
 
     results = _fetch_all(
@@ -343,11 +374,14 @@ def source_dataset_statistics(
         params,
     )
 
+    returned_rows = len(results)
     return {
         "tool": "source_dataset_statistics",
         "filters": {"reaction_type": reaction_type},
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
         "assumptions": [
             "Source dataset coverage is computed from reactions.source_dataset.",
@@ -370,6 +404,17 @@ def reaction_type_statistics(
         
     where_clauses, params = _reaction_filters(source_dataset=source_dataset)
     where_sql = _where_sql(where_clauses)
+    count_res = _fetch_one(
+        database_path,
+        f"""
+        SELECT COUNT(DISTINCT r.reaction_type) as c
+        FROM reactions AS r
+        {where_sql}
+        """,
+        params,
+    )
+    total_matching_rows = count_res["c"] if count_res else 0
+
     params.append(row_limit)
 
     results = _fetch_all(
@@ -400,11 +445,14 @@ def reaction_type_statistics(
         params,
     )
 
+    returned_rows = len(results)
     return {
         "tool": "reaction_type_statistics",
         "filters": {"source_dataset": source_dataset},
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
         "assumptions": [
             "Reaction type coverage is computed from reactions.reaction_type.",
@@ -494,6 +542,23 @@ def reagent_statistics(
     where_clauses, params = _reaction_filters(reaction_type, source_dataset)
     where_clauses.append("json_array_length(r.reagents_json) > 0")
     where_sql = _where_sql(where_clauses)
+    count_res = _fetch_one(
+        database_path,
+        f"""
+        SELECT COUNT(*) as c FROM (
+            SELECT 1
+            FROM reactions AS r, json_each(r.reagents_json) AS rg
+            {where_sql}
+            GROUP BY COALESCE(json_extract_string(rg.value, '$.smiles'), ''),
+                     COALESCE(json_extract_string(rg.value, '$.name'), '')
+            HAVING COALESCE(json_extract_string(rg.value, '$.smiles'), '') <> '' OR
+                   COALESCE(json_extract_string(rg.value, '$.name'), '') <> ''
+        )
+        """,
+        params,
+    )
+    total_matching_rows = count_res["c"] if count_res else 0
+
     params.append(row_limit)
 
     results = _fetch_all(
@@ -514,6 +579,7 @@ def reagent_statistics(
         params,
     )
 
+    returned_rows = len(results)
     return {
         "tool": "reagent_statistics",
         "filters": {
@@ -521,7 +587,9 @@ def reagent_statistics(
             "source_dataset": source_dataset,
         },
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
         "assumptions": [
             "Reagents are extracted from reactions.reagents_json.",
@@ -539,6 +607,16 @@ def compare_datasets(
     """Compare high-level statistics across different datasets or reaction types."""
     if group_by not in ("source_dataset", "reaction_type"):
         group_by = "source_dataset"
+
+    count_res = _fetch_one(
+        database_path,
+        f"""
+        SELECT COUNT(DISTINCT r.{group_by}) as c
+        FROM reactions AS r
+        WHERE r.{group_by} IS NOT NULL AND r.{group_by} != ''
+        """
+    )
+    total_matching_rows = count_res["c"] if count_res else 0
 
     results = _fetch_all(
         database_path,
@@ -568,10 +646,13 @@ def compare_datasets(
         """,
     )
 
+    returned_rows = len(results)
     return {
         "tool": "compare_datasets",
         "filters": {"group_by": group_by},
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
         "assumptions": [
             f"Comparing based on {group_by}.",
@@ -590,6 +671,27 @@ def top_yield_conditions(
     where_clauses.append("r.reaction_type IS NOT NULL")
     where_clauses.append("p.yield_percent IS NOT NULL")
     where_sql = _where_sql(where_clauses)
+    
+    count_res = _fetch_one(
+        database_path,
+        f"""
+        SELECT COUNT(*) as c FROM (
+            SELECT 1
+            FROM reactions r
+            JOIN procedures p ON r.reaction_id = p.reaction_id
+            JOIN (
+              SELECT reaction_id, unnest(from_json(catalysts_json, '["VARCHAR"]')) as catalyst 
+              FROM reactions
+              WHERE catalysts_json IS NOT NULL AND json_array_length(catalysts_json) > 0
+            ) c ON c.reaction_id = r.reaction_id
+            {where_sql}
+            GROUP BY r.reaction_type, c.catalyst
+            HAVING COUNT(*) >= 5
+        )
+        """,
+        params,
+    )
+    total_matching_rows = count_res["c"] if count_res else 0
     
     results = _fetch_all(
         database_path,
@@ -615,10 +717,13 @@ def top_yield_conditions(
         params,
     )
 
+    returned_rows = len(results)
     return {
         "tool": "top_yield_conditions",
         "filters": {"reaction_type": reaction_type},
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
         "assumptions": [
             "Yield conditions are extracted for explicit reaction_type.",

@@ -1,0 +1,337 @@
+[
+  {
+    "id": "trunc_0",
+    "tool_name": "catalyst_statistics",
+    "query": "What are the top catalysts?",
+    "tool_output": {
+      "limit": 5,
+      "count": 5,
+      "results": [
+        {
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_1",
+    "tool_name": "catalyst_statistics",
+    "query": "What are the top catalysts?",
+    "tool_output": {
+      "limit": 5,
+      "count": 5,
+      "results": [
+        {
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_2",
+    "tool_name": "catalyst_statistics",
+    "query": "What are the top catalysts?",
+    "tool_output": {
+      "limit": 5,
+      "count": 5,
+      "results": [
+        {
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_3",
+    "tool_name": "catalyst_statistics",
+    "query": "What are the top catalysts?",
+    "tool_output": {
+      "limit": 5,
+      "count": 5,
+      "results": [
+        {
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_4",
+    "tool_name": "catalyst_statistics",
+    "query": "What are the top catalysts?",
+    "tool_output": {
+      "limit": 5,
+      "count": 5,
+      "results": [
+        {
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "dq_0",
+    "tool_name": "yield_statistics",
+    "query": "What is the average yield?",
+    "tool_output": {
+      "statistics": {
+        "average": 9000000000000000.0
+      },
+      "clean_statistics": {
+        "average": 65.4
+      },
+      "coverage": {
+        "total_records": 1000,
+        "records_with_finite_value": 10
+      }
+    }
+  },
+  {
+    "id": "dq_1",
+    "tool_name": "yield_statistics",
+    "query": "What is the average yield?",
+    "tool_output": {
+      "statistics": {
+        "average": 9000000000000000.0
+      },
+      "clean_statistics": {
+        "average": 65.4
+      },
+      "coverage": {
+        "total_records": 1000,
+        "records_with_finite_value": 10
+      }
+    }
+  },
+  {
+    "id": "dq_2",
+    "tool_name": "yield_statistics",
+    "query": "What is the average yield?",
+    "tool_output": {
+      "statistics": {
+        "average": 9000000000000000.0
+      },
+      "clean_statistics": {
+        "average": 65.4
+      },
+      "coverage": {
+        "total_records": 1000,
+        "records_with_finite_value": 10
+      }
+    }
+  },
+  {
+    "id": "dq_3",
+    "tool_name": "yield_statistics",
+    "query": "What is the average yield?",
+    "tool_output": {
+      "statistics": {
+        "average": 9000000000000000.0
+      },
+      "clean_statistics": {
+        "average": 65.4
+      },
+      "coverage": {
+        "total_records": 1000,
+        "records_with_finite_value": 10
+      }
+    }
+  },
+  {
+    "id": "dq_4",
+    "tool_name": "yield_statistics",
+    "query": "What is the average yield?",
+    "tool_output": {
+      "statistics": {
+        "average": 9000000000000000.0
+      },
+      "clean_statistics": {
+        "average": 65.4
+      },
+      "coverage": {
+        "total_records": 1000,
+        "records_with_finite_value": 10
+      }
+    }
+  },
+  {
+    "id": "norm_0",
+    "tool_name": "dataset_summary",
+    "query": "Summarize the database",
+    "tool_output": {
+      "total_reactions": 2000000,
+      "total_procedures": 1500000
+    }
+  },
+  {
+    "id": "norm_1",
+    "tool_name": "dataset_summary",
+    "query": "Summarize the database",
+    "tool_output": {
+      "total_reactions": 2000000,
+      "total_procedures": 1500000
+    }
+  },
+  {
+    "id": "norm_2",
+    "tool_name": "dataset_summary",
+    "query": "Summarize the database",
+    "tool_output": {
+      "total_reactions": 2000000,
+      "total_procedures": 1500000
+    }
+  },
+  {
+    "id": "norm_3",
+    "tool_name": "dataset_summary",
+    "query": "Summarize the database",
+    "tool_output": {
+      "total_reactions": 2000000,
+      "total_procedures": 1500000
+    }
+  },
+  {
+    "id": "norm_4",
+    "tool_name": "dataset_summary",
+    "query": "Summarize the database",
+    "tool_output": {
+      "total_reactions": 2000000,
+      "total_procedures": 1500000
+    }
+  },
+  {
+    "id": "edge_0",
+    "tool_name": "search_reactions",
+    "query": "Search for unobtainium",
+    "tool_output": {
+      "limit": 5,
+      "count": 0,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_1",
+    "tool_name": "search_reactions",
+    "query": "Search for unobtainium",
+    "tool_output": {
+      "limit": 5,
+      "count": 0,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_2",
+    "tool_name": "search_reactions",
+    "query": "Search for unobtainium",
+    "tool_output": {
+      "limit": 5,
+      "count": 0,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_3",
+    "tool_name": "search_reactions",
+    "query": "Search for unobtainium",
+    "tool_output": {
+      "limit": 5,
+      "count": 0,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_4",
+    "tool_name": "search_reactions",
+    "query": "Search for unobtainium",
+    "tool_output": {
+      "limit": 5,
+      "count": 0,
+      "results": []
+    }
+  }
+]

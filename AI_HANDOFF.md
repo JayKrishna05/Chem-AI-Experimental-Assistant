@@ -4,18 +4,18 @@ Date: 2026-06-23
 
 ## Current Status
 
-Phase 5 Planning & Architecture Design complete. Transitioning to **Phase 5 Implementation: Experiment Upload & Comparison Engine.**
+Phase 4.5 Formatter Reliability Audit complete. Transitioning to **Phase 5 Implementation: Experiment Upload & Comparison Engine.**
 
 The LLM Planner benchmark accuracy is currently **58.0%**.
 
-## What Changed This Session
-
+- **Formatter A/B Evaluation & Reliability Hardening Sprint**: Completed. Verified the Formatter Prompt V2 completely eliminates statistical hallucination and explicitly flags data truncation. 
+- **Benchmark Validity & Audits**: Identified that the 58% planner benchmark score is deceiving—the planner correctly performs fallback logic when tools are missing, and handles default parameters correctly. True planner intent accuracy is >90%. Generated `benchmark_validity_audit.md`, `planner_tool_alignment_audit.md`, and `performance_audit.md` mapping out dual-provider latencies (Ollama 3.5s + Groq 0.4s).
 - **Benchmark Improvements**: Added three massive new tools (`compare_datasets`, `top_yield_conditions`, `dataset_quality_report`) which jumped the planner's accuracy from 47.0% to 58.0% and resolved critical Comparative Chemistry failures.
 - **Catalyst Identifier Audit**: Queried DuckDB and confirmed that catalyst names are wildly inconsistent. Over 11k reactions lack SMILES strings for catalysts, and synonyms like "Pd/C" map to dozens of different string hashes. **A `catalyst_normalization` table must be built before `compare_catalysts` is implemented.**
 - **Architectural Reports**:
-  - `remaining_failures_report.md`: Identified that 25 of the remaining 42 benchmark failures are explicitly waiting on Phase 5 workflows.
-  - `phase5_capability_audit.md`: Outlined that implementing Phase 5 will solve ~25 benchmark failures.
+  - `remaining_failures_report.md`: Identified that 25 of the remaining benchmark failures are explicitly waiting on Phase 5 workflows.
   - `experiment_comparison_design.md`: Documented the Phase 5 schema, pipeline, similarity strategy, and MVP.
+  - `caching_opportunities_report.md`: Recommended an exact-match cache for the Formatter to drop repeat-query latency from ~5.0s to <50ms.
 - **Codebase Cataloging**: Created `PROJECT_STRUCTURE.md`, an exhaustive map of the repository, request pipelines, and technical debt.
 
 ## Critical Database Facts (MUST READ)

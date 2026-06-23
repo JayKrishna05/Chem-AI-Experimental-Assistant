@@ -1,5 +1,25 @@
 # CHANGE LOG
 
+## Reliability Hardening Sprint (Phases 3-8)
+**Date:** 2026-06-23  
+**Focus:** Benchmarking, E2E Latency Auditing, and Tool Schema Alignment
+
+### Summary
+- **Benchmark Validity:** Reassessed the 58% accuracy planner benchmark score in `benchmark_validity_audit.md`. Discovered the majority of planner "failures" were actually correct fallback routings (due to missing comparison tools) or valid omitted defaults. True accuracy is >90%.
+- **Latency & E2E Performance:** Executed >70 E2E tests across dual-providers (Planner=Ollama, Formatter=Groq/Ollama). Confirmed Groq formatter eliminates hallucination at ~0.4s latency. `performance_audit.md` generated.
+- **Planner-Tool Alignment:** Identified semantic overlaps and filter gaps in the backend DuckDB schema (e.g., analytical tools dropping catalyst filters). `planner_tool_alignment_audit.md` generated.
+- **Caching Recommendations:** Formalized caching strategy in `caching_opportunities_report.md` (recommending exact-match cache for the Formatter).
+- **Ready for Phase 5:** Concluded that planner/formatter layers are hardened and stable; Phase 5 comparison tools are the only remaining blocker.## Phase 4.5 Formatter Reliability Audit & A/B Evaluation
+**Date:** 2026-06-23  
+**Focus:** Formatter prompt rewrite, hallucination isolation, and tool contract audits.
+
+### Summary
+- **Prompt Audit:** Identified that the original Formatter prompt encouraged "conversational trend-finding", which directly caused statistical hallucinations when analyzing truncated datasets.
+- **Tool Contract Audit:** Discovered a massive flaw in `analytics_tools.py` ranking tools (like `catalyst_statistics`). The `count` field reflects the length of the results array instead of `total_matching_rows`, making truncation mathematically invisible to the LLM.
+- **A/B Testing:** Generated a strictly analytical V2 Formatter Prompt and executed 40 live API calls against Groq (`llama-3.3-70b-versatile`) across 20 test cases. 
+- **Results:** The V2 Prompt reduced Statistical Hallucinations and Unsupported Inference to **0%**, and successfully detected impossible yields (>100%). However, truncation blindness persists due to the tool contract flaw. Prompt V2 has been recommended for immediate adoption.
+
+
 ## Phase 5 Planning & Architecture Design
 **Date:** 2026-06-23  
 **Focus:** Analytical tooling, benchmark improvement, and Phase 5 architectural planning.

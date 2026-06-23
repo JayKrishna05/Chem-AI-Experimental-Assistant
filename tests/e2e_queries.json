@@ -1,0 +1,22 @@
+[
+  "Find reactions that use Pd/C as a catalyst.",
+  "What is the average yield of Buchwald-Hartwig aminations?",
+  "Show me the procedures for making Acetone.",
+  "Compare the source datasets by the number of reactions they have.",
+  "What are the top 5 highest yielding catalysts for Suzuki coupling?",
+  "Search for reactions using CCO as a reactant.",
+  "What is the dataset quality like? Are there many missing temperatures?",
+  "What is the most common reagent used in the database?",
+  "Find procedures involving heating to 100C.",
+  "Is there any data on reactions using c1ccccc1?",
+  "What is the minimum yield of an amide coupling?",
+  "Show me exactly 3 reactions that use Pd/C.",
+  "What are the top 5 most common reaction types?",
+  "Compare the catalysts Pd(PPh3)4 and Pd/C.",
+  "Find reactions with a yield above 95% and temperature below 0C.",
+  "Which dataset has the most missing catalyst SMILES?",
+  "What is the average yield of reactions in the USPTO dataset?",
+  "Find procedures using both ethanol and heating above 80C.",
+  "What is the best catalyst for amide coupling?",
+  "List all reactions where the product is aspirin."
+]

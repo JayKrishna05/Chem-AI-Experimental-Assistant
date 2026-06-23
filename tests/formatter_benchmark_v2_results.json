@@ -1,0 +1,122 @@
+[
+  {
+    "id": "trunc_0",
+    "duration_s": 0.7454835001844913,
+    "response_length": 671,
+    "response": "**Observations:**\n* The tool returned 5 catalysts with their respective SMILES notation and names.\n* The reaction counts for the returned catalysts are: 100, 99, 98, 97, and 96.\n* The total number of matching rows is 5000, but only 5 rows were returned.\n\n**Data Quality Notes:**\nWarning: Data is truncated. Only showing a partial sample.\n\n**Interpretation:**\nBased on the returned data, the top catalysts (in the returned sample) are cat_0, cat_1, cat_2, cat_3, and cat_4, with reaction counts of 100, 99, 98, 97, and 96, respectively. However, due to truncation, this list may not represent the actual top catalysts.\n\n**Confidence:**\nLOW (Truncated list or small sample)"
+  },
+  {
+    "id": "trunc_1",
+    "duration_s": 0.8490204999689013,
+    "response_length": 696,
+    "response": "**Observations:**\n* The tool returned 5 catalysts.\n* The catalysts and their reaction counts are:\n  + cat_0 (C0): 100 reactions\n  + cat_1 (C1): 99 reactions\n  + cat_2 (C2): 98 reactions\n  + cat_3 (C3): 97 reactions\n  + cat_4 (C4): 96 reactions\n\n**Data Quality Notes:**\nWarning: Data is truncated. Only showing a partial sample.\n\n**Interpretation:**\nBased on the returned sample, the top catalysts are cat_0 (C0) with 100 reactions, cat_1 (C1) with 99 reactions, cat_2 (C2) with 98 reactions, cat_3 (C3) with 97 reactions, and cat_4 (C4) with 96 reactions. However, due to truncation, this may not represent the complete list of top catalysts.\n\n**Confidence:**\nLOW (Truncated list or small sample)"
+  },
+  {
+    "id": "trunc_2",
+    "duration_s": 0.661949000088498,
+    "response_length": 428,
+    "response": "**Observations:**\n* The top 5 catalysts shown are: cat_0, cat_1, cat_2, cat_3, cat_4\n* Their respective reaction counts are: 100, 99, 98, 97, 96\n\n**Data Quality Notes:**\nWarning: Data is truncated. Only showing a partial sample.\n\n**Interpretation:**\nThe top catalysts listed are cat_0, cat_1, cat_2, cat_3, cat_4, based on the reaction counts provided in the partial sample.\n\n**Confidence:**\nLOW (Truncated list or small sample)"
+  },
+  {
+    "id": "trunc_3",
+    "duration_s": 1.0768002001568675,
+    "response_length": 687,
+    "response": "**Observations:**\n* The tool returned 5 catalysts out of 5300 total matching rows.\n* The top 5 catalysts (based on the returned sample) are: \n  + cat_0 with 100 reactions\n  + cat_1 with 99 reactions\n  + cat_2 with 98 reactions\n  + cat_3 with 97 reactions\n  + cat_4 with 96 reactions\n\n**Data Quality Notes:**\nWarning: Data is truncated. Only showing a partial sample.\n\n**Interpretation:**\nBased on the returned sample, the top catalysts are cat_0, cat_1, cat_2, cat_3, and cat_4, with reaction counts of 100, 99, 98, 97, and 96, respectively. However, due to data truncation, this may not represent the complete list of top catalysts.\n\n**Confidence:**\nLOW (Truncated list or small sample)"
+  },
+  {
+    "id": "trunc_4",
+    "duration_s": 1.5439047999680042,
+    "response_length": 556,
+    "response": "**Observations:**\n* The top 5 catalysts (based on the truncated data) are: cat_0, cat_1, cat_2, cat_3, cat_4\n* Their reaction counts are: 100, 99, 98, 97, 96 respectively\n\n**Data Quality Notes:**\nWarning: Data is truncated. Only showing a partial sample.\n\n**Interpretation:**\nBased on the provided sample, the top catalysts (in order of reaction count) are cat_0, cat_1, cat_2, cat_3, and cat_4. However, due to data truncation, this may not represent the complete or accurate ranking of all catalysts.\n\n**Confidence:**\nLOW (Truncated list or small sample)"
+  },
+  {
+    "id": "dq_0",
+    "duration_s": 1.343355800025165,
+    "response_length": 1177,
+    "response": "**Observations:**\n* The `clean_statistics` block reports an average yield of 65.4.\n* The `statistics` block reports an average of 9e15, but its validity is questionable due to the extremely large value.\n* There is only 1 returned row, but `total_matching_rows` is also 1, indicating no additional data is available beyond this singular row.\n* `records_with_finite_value` in `clean_statistics` is 10, while `total_records` is 1000, suggesting a large portion of records may not have finite values.\n\n**Data Quality Notes:**\n* The `statistics` block average yield value (9e15) seems implausibly high and may indicate an error or outlier in the data.\n* The discrepancy between `records_with_finite_value` (10) and `total_records` (1000) in `clean_statistics` suggests potential data quality issues.\n\n**Interpretation:**\nThe reported average yield from `clean_statistics` is 65.4, but the data's overall quality and the presence of potentially erroneous statistics warrant cautious interpretation.\n\n**Confidence:**\nLOW (Due to questionable average in `statistics` block, significant discrepancy between `records_with_finite_value` and `total_records`, and the singular returned row)"
+  },
+  {
+    "id": "dq_1",
+    "duration_s": 0.8819448999129236,
+    "response_length": 755,
+    "response": "**Observations:**\n* The `clean_statistics` block provides an average yield of 80.0.\n* There is 1 returned row and 1 total matching row, with no truncation indicated.\n* The `total_records` is 50, and `records_with_finite_value` is also 50.\n* The `quality_checks` block reports 500 records with yields above 100.\n\n**Data Quality Notes:**\n* Yields above 100% are present, as indicated by `above_hundred_count` being 500, which is a significant portion of the total records.\n\n**Interpretation:**\nThe average yield is reported as 80.0 by the `clean_statistics` block, but the presence of yields above 100% may affect the overall interpretation of the data.\n\n**Confidence:**\nLOW (Due to the presence of yields above 100%, which may indicate data quality issues)"
+  },
+  {
+    "id": "dq_2",
+    "duration_s": 0.7527733000461012,
+    "response_length": 531,
+    "response": "**Observations:**\n* The tool returned 1 row of data.\n* The `clean_statistics` block reports an average yield of 80.0.\n* There are 50 total records, with 50 records having finite values.\n* 500 records have yields above 100%.\n\n**Data Quality Notes:**\n* There are yields above 100%, which is impossible and indicates a data quality issue.\n\n**Interpretation:**\nThe reported average yield is 80.0, but this result should be treated with caution due to the presence of yields above 100%.\n\n**Confidence:**\nLOW (Due to data quality issues)"
+  },
+  {
+    "id": "dq_3",
+    "duration_s": 1.3138549998402596,
+    "response_length": 684,
+    "response": "**Observations:**\n* The `clean_statistics` block provides an average yield of 80.0.\n* There is 1 returned row and 1 total matching row, with no truncation indicated.\n* The `quality_checks` block reports 500 records with yields above 100%.\n\n**Data Quality Notes:**\n* Yields above 100% are present, as indicated by `above_hundred_count` being 500, which is a significant portion of the total records (50).\n\n**Interpretation:**\nThe average yield is reported as 80.0 by the `clean_statistics` block, but the data quality is compromised due to the presence of yields above 100%.\n\n**Confidence:**\nLOW (Due to the presence of yields above 100%, which indicates potential data quality issues)"
+  },
+  {
+    "id": "dq_4",
+    "duration_s": 1.1314115999266505,
+    "response_length": 657,
+    "response": "**Observations:**\n* The `clean_statistics` block provides an average yield of 80.0.\n* There is 1 returned row and 1 total matching row, with no truncation indicated.\n* The `total_records` is 50, and `records_with_finite_value` is also 50.\n\n**Data Quality Notes:**\n* The `quality_checks` block indicates 500 records have yields above 100%, which is impossible.\n\n**Interpretation:**\nThe average yield is 80.0, as provided by the `clean_statistics` block. However, the data quality is compromised due to a significant number of records having yields above 100%.\n\n**Confidence:**\nLOW (Due to the presence of impossible yield values in a large number of records)"
+  },
+  {
+    "id": "normal_0",
+    "duration_s": 0.577749399933964,
+    "response_length": 342,
+    "response": "**Observations:**\n* Two reactions were found with \"CCO\" as a reactant.\n* The reaction IDs are \"1\" and \"2\".\n* Both reactions have \"CCO\" listed in their reactants_json field.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThe search found two reactions that include \"CCO\" as a reactant, with reaction IDs \"1\" and \"2\".\n\n**Confidence:**\nHIGH"
+  },
+  {
+    "id": "normal_1",
+    "duration_s": 0.5377628998830914,
+    "response_length": 335,
+    "response": "**Observations:**\n* Two reactions were found with \"CCO\" as a reactant.\n* The reaction IDs are \"1\" and \"2\".\n* Both reactions have \"CCO\" listed in their `reactants_json` field.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThe search found two reactions that include \"CCO\" as a reactant, with IDs \"1\" and \"2\".\n\n**Confidence:**\nHIGH"
+  },
+  {
+    "id": "normal_2",
+    "duration_s": 0.7385122000705451,
+    "response_length": 337,
+    "response": "**Observations:**\n* The search found 2 reactions that match the query.\n* Both reactions have \"CCO\" as a reactant.\n* The reaction IDs are \"1\" and \"2\".\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThe search found two reactions with CCO as a reactant, with reaction IDs \"1\" and \"2\".\n\n**Confidence:**\nHIGH (Complete statistical data)"
+  },
+  {
+    "id": "normal_3",
+    "duration_s": 0.49468489992432296,
+    "response_length": 296,
+    "response": "**Observations:**\n* Two reactions were found with \"CCO\" as a reactant.\n* The reaction IDs for these reactions are \"1\" and \"2\".\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThe search found two reactions that include \"CCO\" as a reactant, with reaction IDs \"1\" and \"2\".\n\n**Confidence:**\nHIGH"
+  },
+  {
+    "id": "normal_4",
+    "duration_s": 0.6163452998735011,
+    "response_length": 350,
+    "response": "**Observations:**\n* Two reactions were found with \"CCO\" as a reactant.\n* The reaction IDs are \"1\" and \"2\".\n* Both reactions have \"CCO\" listed in their `reactants_json` field.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThe search for reactions with \"CCO\" as a reactant yielded two results, with reaction IDs \"1\" and \"2\".\n\n**Confidence:**\nHIGH"
+  },
+  {
+    "id": "edge_0",
+    "duration_s": 0.5646470000501722,
+    "response_length": 339,
+    "response": "**Observations:**\n* The `returned_rows` is 0.\n* The `total_matching_rows` is 0.\n* The `truncated` flag is false.\n* The `results` array is empty.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThere is no yield data available for the specified reaction, as no matching rows were found.\n\n**Confidence:**\nHIGH (Complete statistical data)"
+  },
+  {
+    "id": "edge_1",
+    "duration_s": 0.4662092998623848,
+    "response_length": 342,
+    "response": "**Observations:**\n* The tool returned 0 rows.\n* The total number of matching rows is 0.\n* The results array is empty.\n* The data is not truncated.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThere is no yield data available for the impossible reaction, as no matching rows were found.\n\n**Confidence:**\nHIGH (Complete statistical data)"
+  },
+  {
+    "id": "edge_2",
+    "duration_s": 0.5314038000069559,
+    "response_length": 507,
+    "response": "**Observations:**\n* The `returned_rows` is 0, indicating no data was returned.\n* The `total_matching_rows` is 0, indicating there are no matching rows in the database.\n* The `truncated` field is `false`, indicating the data is not truncated.\n* The `results` array is empty.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThere is no yield data available for the impossible reaction, as there are no matching rows in the database.\n\n**Confidence:**\nHIGH (No data available, but this is explicitly stated)"
+  },
+  {
+    "id": "edge_3",
+    "duration_s": 0.4849861999973655,
+    "response_length": 339,
+    "response": "**Observations:**\n* The tool returned 0 rows.\n* The total number of matching rows is 0.\n* The results array is empty.\n* The data is not truncated.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThere is no data available on the yield of the impossible reaction, as no matching rows were found.\n\n**Confidence:**\nLOW (No data available)"
+  },
+  {
+    "id": "edge_4",
+    "duration_s": 0.5308864000253379,
+    "response_length": 449,
+    "response": "**Observations:**\n* The `returned_rows` is 0, indicating no data was found.\n* The `total_matching_rows` is 0, suggesting no matching records exist.\n* The `truncated` field is `false`, meaning the data is not truncated.\n* The `results` array is empty.\n\n**Data Quality Notes:**\nNone.\n\n**Interpretation:**\nThere is no yield data available for the impossible reaction, as no matching records were found.\n\n**Confidence:**\nHIGH (Complete statistical data)"
+  }
+]

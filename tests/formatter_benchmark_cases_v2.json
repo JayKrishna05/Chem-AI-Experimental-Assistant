@@ -1,0 +1,452 @@
+[
+  {
+    "id": "trunc_0",
+    "question": "What are the top catalysts?",
+    "tool": "catalyst_statistics",
+    "tool_result": {
+      "returned_rows": 5,
+      "total_matching_rows": 5000,
+      "truncated": true,
+      "results": [
+        {
+          "catalyst_smiles": "C0",
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_smiles": "C1",
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_smiles": "C2",
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_smiles": "C3",
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_smiles": "C4",
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_1",
+    "question": "What are the top catalysts?",
+    "tool": "catalyst_statistics",
+    "tool_result": {
+      "returned_rows": 5,
+      "total_matching_rows": 5100,
+      "truncated": true,
+      "results": [
+        {
+          "catalyst_smiles": "C0",
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_smiles": "C1",
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_smiles": "C2",
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_smiles": "C3",
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_smiles": "C4",
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_2",
+    "question": "What are the top catalysts?",
+    "tool": "catalyst_statistics",
+    "tool_result": {
+      "returned_rows": 5,
+      "total_matching_rows": 5200,
+      "truncated": true,
+      "results": [
+        {
+          "catalyst_smiles": "C0",
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_smiles": "C1",
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_smiles": "C2",
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_smiles": "C3",
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_smiles": "C4",
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_3",
+    "question": "What are the top catalysts?",
+    "tool": "catalyst_statistics",
+    "tool_result": {
+      "returned_rows": 5,
+      "total_matching_rows": 5300,
+      "truncated": true,
+      "results": [
+        {
+          "catalyst_smiles": "C0",
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_smiles": "C1",
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_smiles": "C2",
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_smiles": "C3",
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_smiles": "C4",
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "trunc_4",
+    "question": "What are the top catalysts?",
+    "tool": "catalyst_statistics",
+    "tool_result": {
+      "returned_rows": 5,
+      "total_matching_rows": 5400,
+      "truncated": true,
+      "results": [
+        {
+          "catalyst_smiles": "C0",
+          "catalyst_name": "cat_0",
+          "reaction_count": 100
+        },
+        {
+          "catalyst_smiles": "C1",
+          "catalyst_name": "cat_1",
+          "reaction_count": 99
+        },
+        {
+          "catalyst_smiles": "C2",
+          "catalyst_name": "cat_2",
+          "reaction_count": 98
+        },
+        {
+          "catalyst_smiles": "C3",
+          "catalyst_name": "cat_3",
+          "reaction_count": 97
+        },
+        {
+          "catalyst_smiles": "C4",
+          "catalyst_name": "cat_4",
+          "reaction_count": 96
+        }
+      ]
+    }
+  },
+  {
+    "id": "dq_0",
+    "question": "What is the average yield?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 1,
+      "total_matching_rows": 1,
+      "truncated": false,
+      "clean_statistics": {
+        "average": 65.4,
+        "records_with_finite_value": 10
+      },
+      "total_records": 1000,
+      "statistics": {
+        "average": 9000000000000000.0
+      }
+    }
+  },
+  {
+    "id": "dq_1",
+    "question": "What is the average yield?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 1,
+      "total_matching_rows": 1,
+      "truncated": false,
+      "clean_statistics": {
+        "average": 80.0,
+        "records_with_finite_value": 50
+      },
+      "total_records": 50,
+      "quality_checks": {
+        "above_hundred_count": 500
+      }
+    }
+  },
+  {
+    "id": "dq_2",
+    "question": "What is the average yield?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 1,
+      "total_matching_rows": 1,
+      "truncated": false,
+      "clean_statistics": {
+        "average": 80.0,
+        "records_with_finite_value": 50
+      },
+      "total_records": 50,
+      "quality_checks": {
+        "above_hundred_count": 500
+      }
+    }
+  },
+  {
+    "id": "dq_3",
+    "question": "What is the average yield?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 1,
+      "total_matching_rows": 1,
+      "truncated": false,
+      "clean_statistics": {
+        "average": 80.0,
+        "records_with_finite_value": 50
+      },
+      "total_records": 50,
+      "quality_checks": {
+        "above_hundred_count": 500
+      }
+    }
+  },
+  {
+    "id": "dq_4",
+    "question": "What is the average yield?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 1,
+      "total_matching_rows": 1,
+      "truncated": false,
+      "clean_statistics": {
+        "average": 80.0,
+        "records_with_finite_value": 50
+      },
+      "total_records": 50,
+      "quality_checks": {
+        "above_hundred_count": 500
+      }
+    }
+  },
+  {
+    "id": "normal_0",
+    "question": "Find reactions with CCO",
+    "tool": "search_reactions",
+    "tool_result": {
+      "returned_rows": 2,
+      "total_matching_rows": 2,
+      "truncated": false,
+      "results": [
+        {
+          "reaction_id": "1",
+          "reactants_json": [
+            "CCO"
+          ]
+        },
+        {
+          "reaction_id": "2",
+          "reactants_json": [
+            "CCO"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "normal_1",
+    "question": "Find reactions with CCO",
+    "tool": "search_reactions",
+    "tool_result": {
+      "returned_rows": 2,
+      "total_matching_rows": 2,
+      "truncated": false,
+      "results": [
+        {
+          "reaction_id": "1",
+          "reactants_json": [
+            "CCO"
+          ]
+        },
+        {
+          "reaction_id": "2",
+          "reactants_json": [
+            "CCO"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "normal_2",
+    "question": "Find reactions with CCO",
+    "tool": "search_reactions",
+    "tool_result": {
+      "returned_rows": 2,
+      "total_matching_rows": 2,
+      "truncated": false,
+      "results": [
+        {
+          "reaction_id": "1",
+          "reactants_json": [
+            "CCO"
+          ]
+        },
+        {
+          "reaction_id": "2",
+          "reactants_json": [
+            "CCO"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "normal_3",
+    "question": "Find reactions with CCO",
+    "tool": "search_reactions",
+    "tool_result": {
+      "returned_rows": 2,
+      "total_matching_rows": 2,
+      "truncated": false,
+      "results": [
+        {
+          "reaction_id": "1",
+          "reactants_json": [
+            "CCO"
+          ]
+        },
+        {
+          "reaction_id": "2",
+          "reactants_json": [
+            "CCO"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "normal_4",
+    "question": "Find reactions with CCO",
+    "tool": "search_reactions",
+    "tool_result": {
+      "returned_rows": 2,
+      "total_matching_rows": 2,
+      "truncated": false,
+      "results": [
+        {
+          "reaction_id": "1",
+          "reactants_json": [
+            "CCO"
+          ]
+        },
+        {
+          "reaction_id": "2",
+          "reactants_json": [
+            "CCO"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "edge_0",
+    "question": "What is the yield of impossible reaction?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 0,
+      "total_matching_rows": 0,
+      "truncated": false,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_1",
+    "question": "What is the yield of impossible reaction?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 0,
+      "total_matching_rows": 0,
+      "truncated": false,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_2",
+    "question": "What is the yield of impossible reaction?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 0,
+      "total_matching_rows": 0,
+      "truncated": false,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_3",
+    "question": "What is the yield of impossible reaction?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 0,
+      "total_matching_rows": 0,
+      "truncated": false,
+      "results": []
+    }
+  },
+  {
+    "id": "edge_4",
+    "question": "What is the yield of impossible reaction?",
+    "tool": "yield_statistics",
+    "tool_result": {
+      "returned_rows": 0,
+      "total_matching_rows": 0,
+      "truncated": false,
+      "results": []
+    }
+  }
+]

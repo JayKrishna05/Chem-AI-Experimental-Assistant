@@ -53,6 +53,17 @@ def _execute_structured_query(
     return columns, rows
 
 
+def _execute_count_query(
+    database_path: str | Path | None,
+    sql: str,
+    params: list[Any],
+) -> int:
+    with connect_read_only(database_path) as con:
+        cursor = con.execute(sql, params)
+        row = cursor.fetchone()
+    return row[0] if row else 0
+
+
 def search_reactions(
     *,
     reaction_id: str | None = None,
@@ -81,6 +92,9 @@ def search_reactions(
     _append_like_filter(where_clauses, params, "CAST(products_json AS VARCHAR)", product)
 
     where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    count_sql = f"SELECT COUNT(*) FROM reactions {where_sql}"
+    total_matching_rows = _execute_count_query(database_path, count_sql, params)
+
     params.append(row_limit)
 
     sql = f"""
@@ -114,6 +128,7 @@ def search_reactions(
             item[column] = _json_load(item[column])
         results.append(item)
 
+    returned_rows = len(results)
     return sanitize_json({
         "tool": "search_reactions",
         "filters": {
@@ -127,7 +142,9 @@ def search_reactions(
             "product": product,
         },
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
     })
 
@@ -168,6 +185,9 @@ def search_procedures(
         params.append(float(yield_max))
 
     where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    count_sql = f"SELECT COUNT(*) FROM procedures {where_sql}"
+    total_matching_rows = _execute_count_query(database_path, count_sql, params)
+
     params.append(row_limit)
 
     sql = f"""
@@ -185,6 +205,7 @@ def search_procedures(
     columns, rows = _execute_structured_query(database_path, sql, params)
     results = [dict(zip(columns, row, strict=True)) for row in rows]
 
+    returned_rows = len(results)
     return sanitize_json({
         "tool": "search_procedures",
         "filters": {
@@ -197,7 +218,9 @@ def search_procedures(
             "yield_max": yield_max,
         },
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
     })
 
@@ -227,6 +250,9 @@ def molecule_lookup(
         params.append(int(min_occurrences))
 
     where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    count_sql = f"SELECT COUNT(*) FROM molecules {where_sql}"
+    total_matching_rows = _execute_count_query(database_path, count_sql, params)
+
     params.append(row_limit)
 
     sql = f"""
@@ -239,6 +265,7 @@ def molecule_lookup(
     columns, rows = _execute_structured_query(database_path, sql, params)
     results = [dict(zip(columns, row, strict=True)) for row in rows]
 
+    returned_rows = len(results)
     return sanitize_json({
         "tool": "molecule_lookup",
         "filters": {
@@ -247,6 +274,8 @@ def molecule_lookup(
             "min_occurrences": min_occurrences,
         },
         "limit": row_limit,
-        "count": len(results),
+        "returned_rows": returned_rows,
+        "total_matching_rows": total_matching_rows,
+        "truncated": total_matching_rows > returned_rows,
         "results": results,
     })
