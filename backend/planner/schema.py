@@ -98,6 +98,13 @@ TOOL_FILTER_SCHEMAS: dict[str, dict[str, type]] = {
         "limit": _INT,
     },
     "dataset_summary": {},
+    "compare_datasets": {
+        "group_by": _STR,
+    },
+    "top_yield_conditions": {
+        "reaction_type": _STR,
+    },
+    "dataset_quality_report": {},
 }
 
 KNOWN_TOOLS: frozenset[str] = frozenset(TOOL_FILTER_SCHEMAS)

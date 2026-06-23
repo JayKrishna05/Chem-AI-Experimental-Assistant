@@ -46,6 +46,9 @@ from backend.tools import (
     source_dataset_statistics,
     temperature_statistics,
     yield_statistics,
+    compare_datasets,
+    top_yield_conditions,
+    dataset_quality_report,
 )
 
 from .prompts import SYSTEM_PROMPT
@@ -74,6 +77,9 @@ _TOOL_DISPATCH: dict[str, Callable[..., dict[str, Any]]] = {
     "reaction_type_statistics": reaction_type_statistics,
     "reagent_statistics": reagent_statistics,
     "dataset_summary": dataset_summary,
+    "compare_datasets": compare_datasets,
+    "top_yield_conditions": top_yield_conditions,
+    "dataset_quality_report": dataset_quality_report,
 }
 
 # Sanity-check at import time: every KNOWN_TOOL must have a dispatch entry.

@@ -8,6 +8,9 @@ from .analytics_tools import (
     source_dataset_statistics,
     temperature_statistics,
     yield_statistics,
+    compare_datasets,
+    top_yield_conditions,
+    dataset_quality_report,
 )
 from .chemistry_tools import molecule_lookup, search_procedures, search_reactions
 
@@ -22,4 +25,7 @@ __all__ = [
     "source_dataset_statistics",
     "temperature_statistics",
     "yield_statistics",
+    "compare_datasets",
+    "top_yield_conditions",
+    "dataset_quality_report",
 ]

@@ -1,0 +1,923 @@
+[
+  {
+    "query": "Summarize the database",
+    "expected_tool": "dataset_summary",
+    "expected_filters": {},
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "dataset_summary exists"
+  },
+  {
+    "query": "Executive summary of the database",
+    "expected_tool": "dataset_summary",
+    "expected_filters": {},
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "dataset_summary exists"
+  },
+  {
+    "query": "What is contained in the database?",
+    "expected_tool": "dataset_summary",
+    "expected_filters": {},
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "dataset_summary exists"
+  },
+  {
+    "query": "Give me a database overview",
+    "expected_tool": "dataset_summary",
+    "expected_filters": {},
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "dataset_summary exists"
+  },
+  {
+    "query": "Discuss dataset quality",
+    "expected_tool": "dataset_quality_report",
+    "expected_filters": {},
+    "category": "Database Exploration",
+    "classification": "Partially Supported",
+    "reason": "No tool for detailed quality profiling yet, but summary exists",
+    "expected_tool_original": "dataset_quality_report"
+  },
+  {
+    "query": "Which datasets have the most reactions?",
+    "expected_tool": "source_dataset_statistics",
+    "expected_filters": {
+      "sort_by": "reaction_count"
+    },
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "source_dataset_statistics exists"
+  },
+  {
+    "query": "Compare source datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "source_dataset"
+    },
+    "category": "Database Exploration",
+    "classification": "Unsupported",
+    "reason": "Need comparison tool",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Which datasets contain the most procedures?",
+    "expected_tool": "source_dataset_statistics",
+    "expected_filters": {
+      "sort_by": "procedure_count"
+    },
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "source_dataset_statistics exists"
+  },
+  {
+    "query": "Which datasets contain the most yields?",
+    "expected_tool": "source_dataset_statistics",
+    "expected_filters": {
+      "sort_by": "yield_count"
+    },
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "source_dataset_statistics exists"
+  },
+  {
+    "query": "Which datasets contain the most temperatures?",
+    "expected_tool": "source_dataset_statistics",
+    "expected_filters": {
+      "sort_by": "temperature_count"
+    },
+    "category": "Database Exploration",
+    "classification": "Supported",
+    "reason": "source_dataset_statistics exists"
+  },
+  {
+    "query": "Find ethanol",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "CCO"
+    },
+    "category": "Molecule Search",
+    "classification": "Partially Supported",
+    "reason": "LLM has to map name to SMILES"
+  },
+  {
+    "query": "Find benzene",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "c1ccccc1"
+    },
+    "category": "Molecule Search",
+    "classification": "Partially Supported",
+    "reason": "LLM has to map name to SMILES"
+  },
+  {
+    "query": "Lookup CCO",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "CCO"
+    },
+    "category": "Molecule Search",
+    "classification": "Supported",
+    "reason": "exact SMILES"
+  },
+  {
+    "query": "Search for acetone",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "CC(C)=O"
+    },
+    "category": "Molecule Search",
+    "classification": "Partially Supported",
+    "reason": "name to SMILES"
+  },
+  {
+    "query": "Molecule information for caffeine",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "caffeine"
+    },
+    "category": "Molecule Search",
+    "classification": "Partially Supported",
+    "reason": "Unknown names should fall back to search_procedures"
+  },
+  {
+    "query": "Find molecules with formula C6H6",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {},
+    "category": "Molecule Search",
+    "classification": "Unsupported",
+    "reason": "No formula search available"
+  },
+  {
+    "query": "Search molecules similar to aspirin",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Molecule Search",
+    "classification": "Unsupported",
+    "reason": "No structural similarity search",
+    "expected_tool_original": "similar_molecules"
+  },
+  {
+    "query": "Lookup c1ccccc1",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "c1ccccc1"
+    },
+    "category": "Molecule Search",
+    "classification": "Supported",
+    "reason": "exact SMILES"
+  },
+  {
+    "query": "Find drug molecules",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {},
+    "category": "Molecule Search",
+    "classification": "Unsupported",
+    "reason": "No classification search available"
+  },
+  {
+    "query": "Molecule details for water",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "water"
+    },
+    "category": "Molecule Search",
+    "classification": "Partially Supported",
+    "reason": "Fallback to search_procedures"
+  },
+  {
+    "query": "Show catalyst statistics",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Supported",
+    "reason": "catalyst_statistics exists"
+  },
+  {
+    "query": "Most common catalysts",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Supported",
+    "reason": "catalyst_statistics exists"
+  },
+  {
+    "query": "Top catalysts in the database",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Supported",
+    "reason": "catalyst_statistics exists"
+  },
+  {
+    "query": "Which catalysts occur most frequently?",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Supported",
+    "reason": "catalyst_statistics exists"
+  },
+  {
+    "query": "Catalyst usage trends",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Partially Supported",
+    "reason": "Tool shows overall frequencies but not temporal trends"
+  },
+  {
+    "query": "Compare palladium and copper catalysts",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Unsupported",
+    "reason": "No specific comparison tool",
+    "expected_tool_original": "compare_catalysts"
+  },
+  {
+    "query": "Which catalyst gives the highest yield?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Unsupported",
+    "reason": "No tool correlates catalyst directly to yield",
+    "expected_tool_original": "catalyst_yield_correlation"
+  },
+  {
+    "query": "Most common catalysts in Suzuki reactions",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {
+      "reaction_type": "Suzuki"
+    },
+    "category": "Catalyst Analysis",
+    "classification": "Supported",
+    "reason": "supports reaction_type filter"
+  },
+  {
+    "query": "What catalysts are used for oxidation?",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {
+      "reaction_type": "oxidation"
+    },
+    "category": "Catalyst Analysis",
+    "classification": "Supported",
+    "reason": "supports reaction_type filter"
+  },
+  {
+    "query": "Identify novel catalysts",
+    "expected_tool": "catalyst_statistics",
+    "expected_filters": {},
+    "category": "Catalyst Analysis",
+    "classification": "Unsupported",
+    "reason": "Cannot identify novelty"
+  },
+  {
+    "query": "Show reagent statistics",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Supported",
+    "reason": "reagent_statistics exists"
+  },
+  {
+    "query": "Most common reagents",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Supported",
+    "reason": "reagent_statistics exists"
+  },
+  {
+    "query": "Solvent analysis",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Supported",
+    "reason": "reagent_statistics captures solvents as well"
+  },
+  {
+    "query": "Reagent usage trends",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Partially Supported",
+    "reason": "Captures frequencies but not trends"
+  },
+  {
+    "query": "Which solvents appear most often?",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Supported",
+    "reason": "reagent_statistics handles solvents"
+  },
+  {
+    "query": "Most common additives",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Supported",
+    "reason": "reagent_statistics handles additives"
+  },
+  {
+    "query": "Compare solvents in Suzuki vs Buchwald",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "category": "Reagent Analysis",
+    "classification": "Unsupported",
+    "reason": "No comparison tool",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "What is the best solvent for hydrogenation?",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {
+      "reaction_type": "hydrogenation"
+    },
+    "category": "Reagent Analysis",
+    "classification": "Supported",
+    "reason": "handles reaction type"
+  },
+  {
+    "query": "Reagents used with palladium",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Partially Supported",
+    "reason": "No filter for co-occurrence with specific catalyst"
+  },
+  {
+    "query": "Green chemistry solvent alternatives",
+    "expected_tool": "reagent_statistics",
+    "expected_filters": {},
+    "category": "Reagent Analysis",
+    "classification": "Unsupported",
+    "reason": "No green chemistry metadata"
+  },
+  {
+    "query": "Find procedures mentioning palladium",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "palladium"
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "supports text filtering"
+  },
+  {
+    "query": "Search procedures mentioning ethanol",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "ethanol"
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "supports text filtering"
+  },
+  {
+    "query": "Procedures above 100 C",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "temperature_min": 100.0
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "supports temperature bounds"
+  },
+  {
+    "query": "High yield procedures",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "yield_min": 80.0
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "supports yield bounds"
+  },
+  {
+    "query": "Procedures containing hydrogenation",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "hydrogenation"
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "supports text filtering"
+  },
+  {
+    "query": "Show yield statistics",
+    "expected_tool": "yield_statistics",
+    "expected_filters": {},
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "yield_statistics exists"
+  },
+  {
+    "query": "Average yield for Suzuki reactions",
+    "expected_tool": "yield_statistics",
+    "expected_filters": {
+      "reaction_type": "Suzuki"
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "yield_statistics supports reaction type"
+  },
+  {
+    "query": "Show temperature statistics",
+    "expected_tool": "temperature_statistics",
+    "expected_filters": {},
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "temperature_statistics exists"
+  },
+  {
+    "query": "Average temperature for oxidations",
+    "expected_tool": "temperature_statistics",
+    "expected_filters": {
+      "reaction_type": "oxidation"
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "temperature_statistics supports reaction type"
+  },
+  {
+    "query": "Find procedures with yield between 50 and 70",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "yield_min": 50.0,
+      "yield_max": 70.0
+    },
+    "category": "Procedure Analysis",
+    "classification": "Supported",
+    "reason": "supports yield bounds"
+  },
+  {
+    "query": "Find reactions involving ethanol",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "reactant": "ethanol"
+    },
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "supports reactant filter"
+  },
+  {
+    "query": "Reactions using palladium",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "catalyst": "palladium"
+    },
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "supports catalyst filter"
+  },
+  {
+    "query": "Reactions producing benzene",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "product": "benzene"
+    },
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "supports product filter"
+  },
+  {
+    "query": "Search reactions with acetone",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "reagent": "acetone"
+    },
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "supports reagent filter"
+  },
+  {
+    "query": "Find relevant reactions for CCO",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "reactant": "CCO"
+    },
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "supports exact SMILES as reactant"
+  },
+  {
+    "query": "Show reaction type statistics",
+    "expected_tool": "reaction_type_statistics",
+    "expected_filters": {},
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "reaction_type_statistics exists"
+  },
+  {
+    "query": "Most common reaction types",
+    "expected_tool": "reaction_type_statistics",
+    "expected_filters": {},
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "reaction_type_statistics exists"
+  },
+  {
+    "query": "Analyze reaction types",
+    "expected_tool": "reaction_type_statistics",
+    "expected_filters": {},
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "reaction_type_statistics exists"
+  },
+  {
+    "query": "Reaction class distribution",
+    "expected_tool": "reaction_type_statistics",
+    "expected_filters": {},
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "reaction_type_statistics exists"
+  },
+  {
+    "query": "What reaction types exist?",
+    "expected_tool": "reaction_type_statistics",
+    "expected_filters": {},
+    "category": "Reaction Analysis",
+    "classification": "Supported",
+    "reason": "reaction_type_statistics exists"
+  },
+  {
+    "query": "Compare Suzuki and Buchwald-Hartwig datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare two datasets side by side",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "What is the difference between Palladium and Copper catalysts?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare two catalysts side by side",
+    "expected_tool_original": "compare_catalysts"
+  },
+  {
+    "query": "Compare yields across different source datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "source_dataset"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare yields across datasets",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Compare reaction conditions for hydrogenation vs oxidation",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare conditions",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Which catalyst is better: Pd/C or Pt/C?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare catalysts",
+    "expected_tool_original": "compare_catalysts"
+  },
+  {
+    "query": "Differences in reagent usage between dataset A and B",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "source_dataset"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare reagent frequencies across datasets",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Compare temperature profiles of different reaction types",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare distributions",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Contrast the yields of reactions using ethanol vs methanol",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {},
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to contrast yields based on reactant",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Compare the success rates of different datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "source_dataset"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare datasets",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Compare solvents used in two different reaction types",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported",
+    "reason": "No tool exists to compare solvents across groups",
+    "expected_tool_original": "compare_datasets"
+  },
+  {
+    "query": "Find reactions similar to this one",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No reaction similarity search available",
+    "expected_tool_original": "similar_reactions"
+  },
+  {
+    "query": "Find molecules structurally similar to benzene",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No molecule similarity search available",
+    "expected_tool_original": "similar_molecules"
+  },
+  {
+    "query": "Show me procedures like this one",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No procedure similarity search available",
+    "expected_tool_original": "similar_procedures"
+  },
+  {
+    "query": "Find reactions using similar catalysts to Pd/C",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No catalyst similarity search available",
+    "expected_tool_original": "similar_catalysts"
+  },
+  {
+    "query": "Are there any molecules similar to caffeine?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No molecule similarity search available",
+    "expected_tool_original": "similar_molecules"
+  },
+  {
+    "query": "Find reactions that have similar products to this",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No reaction similarity search available",
+    "expected_tool_original": "similar_reactions"
+  },
+  {
+    "query": "Search for procedures with similar text",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No text embedding similarity search available",
+    "expected_tool_original": "similar_procedures"
+  },
+  {
+    "query": "Find similar reactions by structural fingerprint",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No structural fingerprint similarity search available",
+    "expected_tool_original": "similar_reactions"
+  },
+  {
+    "query": "Find reactions analogous to Suzuki",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No analogous reaction search available",
+    "expected_tool_original": "similar_reactions"
+  },
+  {
+    "query": "Search for similar reagents",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Similarity Search",
+    "classification": "Unsupported",
+    "reason": "No reagent similarity search available",
+    "expected_tool_original": "similar_reagents"
+  },
+  {
+    "query": "What are the best conditions for Suzuki coupling?",
+    "expected_tool": "top_yield_conditions",
+    "expected_filters": {
+      "reaction_type": "Suzuki"
+    },
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No tool extracts optimal conditions",
+    "expected_tool_original": "top_yield_conditions"
+  },
+  {
+    "query": "Recommend a catalyst for hydrogenation",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No tool recommends catalysts",
+    "expected_tool_original": "catalyst_recommendation"
+  },
+  {
+    "query": "Predict the yield of this reaction",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No predictive models available",
+    "expected_tool_original": "yield_prediction"
+  },
+  {
+    "query": "How can I optimize my reaction temperature?",
+    "expected_tool": "top_yield_conditions",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No condition optimization tool",
+    "expected_tool_original": "top_yield_conditions"
+  },
+  {
+    "query": "Suggest an alternative solvent for this reaction",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No solvent recommendation tool",
+    "expected_tool_original": "solvent_recommendation"
+  },
+  {
+    "query": "What is the optimal yield for this reaction class?",
+    "expected_tool": "top_yield_conditions",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No optimal condition extraction",
+    "expected_tool_original": "top_yield_conditions"
+  },
+  {
+    "query": "Design an experiment to test this catalyst",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No experiment design tool",
+    "expected_tool_original": "experiment_design"
+  },
+  {
+    "query": "Recommend reaction conditions for maximum yield",
+    "expected_tool": "top_yield_conditions",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No optimal condition extraction",
+    "expected_tool_original": "top_yield_conditions"
+  },
+  {
+    "query": "What additives improve the yield of this reaction?",
+    "expected_tool": "top_yield_conditions",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No additive impact analysis tool",
+    "expected_tool_original": "top_yield_conditions"
+  },
+  {
+    "query": "Predict the best catalyst for this reaction",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "Experimental Design",
+    "classification": "Unsupported",
+    "reason": "No predictive models available",
+    "expected_tool_original": "catalyst_recommendation"
+  },
+  {
+    "query": "Analyze this uploaded reaction file",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Process this dataset of procedures",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Parse this chemistry paper PDF",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No PDF parsing capability",
+    "expected_tool_original": "parse_pdf"
+  },
+  {
+    "query": "Upload a custom dataset for comparison",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Analyze this CSV of molecules",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Read this uploaded text file",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Process the reactions in this SDF file",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Compare my uploaded reactions to the database",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  },
+  {
+    "query": "Extract conditions from this uploaded paper",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No PDF parsing capability",
+    "expected_tool_original": "parse_pdf"
+  },
+  {
+    "query": "Add this list of SMILES to the search",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "category": "File Upload Workflows",
+    "classification": "Unsupported",
+    "reason": "No file upload capability",
+    "expected_tool_original": "analyze_uploaded_file"
+  }
+]

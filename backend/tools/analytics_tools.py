@@ -529,3 +529,129 @@ def reagent_statistics(
             "reaction_count counts distinct reactions containing that reagent entry.",
         ],
     }
+
+
+def compare_datasets(
+    *,
+    group_by: str = "source_dataset",
+    database_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Compare high-level statistics across different datasets or reaction types."""
+    if group_by not in ("source_dataset", "reaction_type"):
+        group_by = "source_dataset"
+
+    results = _fetch_all(
+        database_path,
+        f"""
+        WITH procedure_counts AS (
+            SELECT
+                reaction_id,
+                COUNT(*) AS procedure_count,
+                COUNT(yield_percent) AS yield_count,
+                AVG(yield_percent) AS avg_yield,
+                AVG(temperature_c) AS avg_temperature
+            FROM procedures
+            GROUP BY reaction_id
+        )
+        SELECT
+            r.{group_by} AS dataset_name,
+            COUNT(DISTINCT r.reaction_id) AS reaction_count,
+            COALESCE(SUM(pc.procedure_count), 0) AS procedure_count,
+            COALESCE(AVG(pc.avg_yield), 0) AS avg_yield,
+            COALESCE(AVG(pc.avg_temperature), 0) AS avg_temperature
+        FROM reactions AS r
+        LEFT JOIN procedure_counts AS pc ON pc.reaction_id = r.reaction_id
+        WHERE r.{group_by} IS NOT NULL AND r.{group_by} != ''
+        GROUP BY r.{group_by}
+        ORDER BY reaction_count DESC
+        LIMIT 50
+        """,
+    )
+
+    return {
+        "tool": "compare_datasets",
+        "filters": {"group_by": group_by},
+        "count": len(results),
+        "results": results,
+        "assumptions": [
+            f"Comparing based on {group_by}.",
+            "Averages are computed across procedures that have non-null values.",
+        ],
+    }
+
+
+def top_yield_conditions(
+    *,
+    reaction_type: str | None = None,
+    database_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Extract optimal reaction conditions (catalyst, temp) yielding the highest average yields."""
+    where_clauses, params = _reaction_filters(reaction_type)
+    where_clauses.append("r.reaction_type IS NOT NULL")
+    where_clauses.append("p.yield_percent IS NOT NULL")
+    where_sql = _where_sql(where_clauses)
+    
+    results = _fetch_all(
+        database_path,
+        f"""
+        SELECT 
+            r.reaction_type,
+            c.catalyst as catalyst,
+            COUNT(*) as freq,
+            AVG(p.yield_percent) as avg_yield
+        FROM reactions r
+        JOIN procedures p ON r.reaction_id = p.reaction_id
+        JOIN (
+          SELECT reaction_id, unnest(from_json(catalysts_json, '["VARCHAR"]')) as catalyst 
+          FROM reactions
+          WHERE catalysts_json IS NOT NULL AND json_array_length(catalysts_json) > 0
+        ) c ON c.reaction_id = r.reaction_id
+        {where_sql}
+        GROUP BY r.reaction_type, c.catalyst
+        HAVING COUNT(*) >= 5
+        ORDER BY avg_yield DESC
+        LIMIT 20
+        """,
+        params,
+    )
+
+    return {
+        "tool": "top_yield_conditions",
+        "filters": {"reaction_type": reaction_type},
+        "count": len(results),
+        "results": results,
+        "assumptions": [
+            "Yield conditions are extracted for explicit reaction_type.",
+            "Requires at least 5 reported yields for statistical significance.",
+        ],
+    }
+
+
+def dataset_quality_report(
+    *,
+    database_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Generate a data quality report profiling nullability and metadata completeness."""
+    results = _fetch_one(
+        database_path,
+        """
+        SELECT
+            COUNT(r.reaction_id) as total_reactions,
+            SUM(CASE WHEN r.reaction_type IS NOT NULL THEN 1 ELSE 0 END) as reactions_with_type,
+            COUNT(p.reaction_id) as total_procedures,
+            SUM(CASE WHEN p.yield_percent IS NOT NULL THEN 1 ELSE 0 END) as procedures_with_yield,
+            SUM(CASE WHEN p.temperature_c IS NOT NULL THEN 1 ELSE 0 END) as procedures_with_temp
+        FROM reactions r
+        LEFT JOIN procedures p ON r.reaction_id = p.reaction_id
+        """,
+    )
+
+    return {
+        "tool": "dataset_quality_report",
+        "filters": {},
+        "results": results,
+        "assumptions": [
+            "Profiles exact nullability counts across reactions and procedures.",
+        ],
+    }
+

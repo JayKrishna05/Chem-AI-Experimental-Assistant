@@ -8,8 +8,19 @@ import { ChatInput } from "./ChatInput";
 import { useState, useEffect } from "react";
 
 export function ChatInterface() {
-  const { messages, sendMessage, isGenerating } = useChatStream();
-  const { models, currentPlannerModel, currentFormatterModel, formatterTimeout, updateModels } = useModels();
+  const { messages, sendMessage, isGenerating, updateStreamConfig } = useChatStream();
+  const { 
+    providers, 
+    plannerModels, 
+    formatterModels, 
+    currentPlannerProvider, 
+    currentPlannerModel, 
+    plannerTimeout,
+    currentFormatterProvider, 
+    currentFormatterModel, 
+    formatterTimeout, 
+    updateConfig 
+  } = useModels();
   
   const [timeoutInput, setTimeoutInput] = useState<string>("59");
   const [timeoutError, setTimeoutError] = useState<string | null>(null);
@@ -18,6 +29,26 @@ export function ChatInterface() {
     setTimeoutInput(formatterTimeout.toString());
   }, [formatterTimeout]);
 
+  // Keep useChatStream in sync with UI models/providers changes
+  useEffect(() => {
+    updateStreamConfig({
+      plannerProvider: currentPlannerProvider,
+      plannerModel: currentPlannerModel,
+      plannerTimeout: plannerTimeout,
+      formatterProvider: currentFormatterProvider,
+      formatterModel: currentFormatterModel,
+      formatterTimeout: formatterTimeout
+    });
+  }, [
+    currentPlannerProvider, 
+    currentPlannerModel, 
+    plannerTimeout, 
+    currentFormatterProvider, 
+    currentFormatterModel, 
+    formatterTimeout, 
+    updateStreamConfig
+  ]);
+
   const handleApplyTimeout = () => {
     const val = parseFloat(timeoutInput);
     if (isNaN(val) || val < 5 || val > 300) {
@@ -25,7 +56,7 @@ export function ChatInterface() {
       return;
     }
     setTimeoutError(null);
-    updateModels(undefined, undefined, val);
+    updateConfig({ planner_timeout: val, formatter_timeout: val });
   };
 
   return (
@@ -37,23 +68,39 @@ export function ChatInterface() {
           <div className="flex items-center gap-2">
             <label className="text-xs text-muted-foreground font-semibold">Planner:</label>
             <select 
+              className="text-sm bg-secondary text-secondary-foreground border border-border rounded px-2 py-1 outline-none w-24"
+              value={currentPlannerProvider}
+              onChange={(e) => updateConfig({ planner_provider: e.target.value })}
+            >
+              <option value="loading..." disabled>provider...</option>
+              {providers.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select 
               className="text-sm bg-secondary text-secondary-foreground border border-border rounded px-2 py-1 outline-none max-w-[120px] sm:max-w-none"
               value={currentPlannerModel}
-              onChange={(e) => updateModels(e.target.value, undefined)}
+              onChange={(e) => updateConfig({ planner_model: e.target.value })}
             >
-              <option value="loading..." disabled>loading...</option>
-              {models.map(m => <option key={m} value={m} title={m}>{m.length > 20 ? m.substring(0, 17) + '...' : m}</option>)}
+              <option value="loading..." disabled>model...</option>
+              {plannerModels.map(m => <option key={m} value={m} title={m}>{m.length > 20 ? m.substring(0, 17) + '...' : m}</option>)}
             </select>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-muted-foreground font-semibold">Formatter:</label>
             <select 
+              className="text-sm bg-secondary text-secondary-foreground border border-border rounded px-2 py-1 outline-none w-24"
+              value={currentFormatterProvider}
+              onChange={(e) => updateConfig({ formatter_provider: e.target.value })}
+            >
+              <option value="loading..." disabled>provider...</option>
+              {providers.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select 
               className="text-sm bg-secondary text-secondary-foreground border border-border rounded px-2 py-1 outline-none max-w-[120px] sm:max-w-none"
               value={currentFormatterModel}
-              onChange={(e) => updateModels(undefined, e.target.value)}
+              onChange={(e) => updateConfig({ formatter_model: e.target.value })}
             >
-              <option value="loading..." disabled>loading...</option>
-              {models.map(m => <option key={m} value={m} title={m}>{m.length > 20 ? m.substring(0, 17) + '...' : m}</option>)}
+              <option value="loading..." disabled>model...</option>
+              {formatterModels.map(m => <option key={m} value={m} title={m}>{m.length > 20 ? m.substring(0, 17) + '...' : m}</option>)}
             </select>
           </div>
           <div className="flex items-center gap-2">
@@ -77,13 +124,15 @@ export function ChatInterface() {
             </button>
             {timeoutError && <span className="text-xs text-destructive">{timeoutError}</span>}
           </div>
-          <div className="text-xs text-muted-foreground font-mono ml-2 hidden md:block">Experimental Engine V1</div>
+          <div className="text-xs text-muted-foreground font-mono ml-2 hidden xl:block">Experimental Engine V1</div>
         </div>
       </header>
       
-      <main className="flex-1 overflow-hidden flex flex-col relative">
+      <main className="flex-1 flex flex-col min-h-0 relative">
         <ChatStream messages={messages} onSuggestion={(q) => { if (!isGenerating) sendMessage(q); }} />
-        <ChatInput onSendMessage={sendMessage} disabled={isGenerating} />
+        <div className="shrink-0">
+          <ChatInput onSendMessage={sendMessage} disabled={isGenerating} />
+        </div>
       </main>
     </div>
   );

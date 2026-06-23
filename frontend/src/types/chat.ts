@@ -6,10 +6,26 @@ export interface ModelsResponse {
   models: string[];
 }
 
+export interface ProvidersResponse {
+  providers: string[];
+}
+
 export interface CurrentModelsResponse {
+  planner_provider: string;
   planner_model: string;
+  planner_timeout: number;
+  formatter_provider: string;
   formatter_model: string;
   formatter_timeout: number;
+}
+
+export interface SetModelsRequest {
+  planner_provider?: string;
+  planner_model?: string;
+  planner_timeout?: number;
+  formatter_provider?: string;
+  formatter_model?: string;
+  formatter_timeout?: number;
 }
 
 export interface ChatMessage {
@@ -23,6 +39,16 @@ export interface ChatMessage {
   filters?: Record<string, unknown>;
   rawData?: unknown;
   errorMessage?: string;
+  
+  // Execution metadata for Dev Tools
+  plannerProvider?: string;
+  plannerModel?: string;
+  plannerTimeMs?: number;
+  toolTimeMs?: number;
+  formatterProvider?: string;
+  formatterModel?: string;
+  formatterTimeMs?: number;
+  totalTimeMs?: number;
 }
 
 export interface ChatEvent {
@@ -33,4 +59,14 @@ export interface ChatEvent {
   text?: string;
   message?: string;
   question?: string;
+  
+  // Execution metadata
+  plannerProvider?: string;
+  plannerModel?: string;
+  plannerTimeMs?: number;
+  toolTimeMs?: number;
+  formatterProvider?: string;
+  formatterModel?: string;
+  formatterTimeMs?: number;
+  totalTimeMs?: number;
 }

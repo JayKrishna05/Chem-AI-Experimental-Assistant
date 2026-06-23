@@ -68,6 +68,7 @@ class AnthropicProvider(BaseProvider):
         messages: list[Message],
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -82,6 +83,7 @@ class AnthropicProvider(BaseProvider):
         prompt: str,
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -90,3 +92,12 @@ class AnthropicProvider(BaseProvider):
             "AnthropicProvider.generate is not yet implemented.  "
             "See the module docstring for implementation guidance."
         )
+
+    def list_models(self) -> list[str]:
+        """Return known Anthropic model names (static list — no live API call yet)."""
+        return [
+            "claude-opus-4-5",
+            "claude-sonnet-4-5",
+            "claude-3-5-haiku-latest",
+            "claude-3-opus-latest",
+        ]

@@ -54,6 +54,32 @@ export function ChatMessage({ message }: { message: ChatMessageType }) {
             rawData={message.rawData} 
           />
         )}
+        
+        {/* Dev Tools Accordion */}
+        {!isUser && message.totalTimeMs !== undefined && (
+          <div className="mt-4 border-t border-border pt-2">
+            <details className="group/details">
+              <summary className="text-xs text-muted-foreground font-semibold cursor-pointer list-none flex items-center gap-1 select-none hover:text-foreground transition-colors">
+                <span className="group-open/details:rotate-90 transition-transform text-[10px]">▶</span>
+                Dev Tools Trace ({message.totalTimeMs}ms)
+              </summary>
+              <div className="mt-2 text-[11px] font-mono text-muted-foreground space-y-1 bg-background/50 p-2 rounded border border-border">
+                <div className="flex justify-between">
+                  <span>Planner ({message.plannerProvider}/{message.plannerModel}):</span>
+                  <span className="font-semibold">{message.plannerTimeMs}ms</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Formatter ({message.formatterProvider}/{message.formatterModel}):</span>
+                  <span className="font-semibold">{message.formatterTimeMs}ms</span>
+                </div>
+                <div className="pt-1 mt-1 border-t border-border flex justify-between text-foreground">
+                  <span>Total Response Time:</span>
+                  <span className="font-bold">{message.totalTimeMs}ms</span>
+                </div>
+              </div>
+            </details>
+          </div>
+        )}
       </div>
     </div>
   );

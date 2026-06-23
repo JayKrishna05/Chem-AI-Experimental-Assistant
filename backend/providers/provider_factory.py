@@ -14,6 +14,8 @@ Supported providers
     Anthropic API (stub — not yet implemented).
 ``gemini``
     Google Gemini API (stub — not yet implemented).
+``groq``
+    Groq cloud API (live).
 
 Configuration
 -------------
@@ -29,6 +31,7 @@ from .anthropic_provider import AnthropicProvider
 from .base import BaseProvider
 from .config import ProviderConfig, load_config
 from .gemini_provider import GeminiProvider
+from .groq_provider import GroqProvider
 from .ollama_provider import OllamaProvider
 from .openai_provider import OpenAIProvider
 
@@ -37,9 +40,7 @@ from .openai_provider import OpenAIProvider
 # Adding a new provider only requires adding an entry here.
 _PROVIDER_REGISTRY: dict[str, type[BaseProvider]] = {
     "ollama": OllamaProvider,
-    "openai": OpenAIProvider,
-    "anthropic": AnthropicProvider,
-    "gemini": GeminiProvider,
+    "groq": GroqProvider,
 }
 
 SUPPORTED_PROVIDERS: frozenset[str] = frozenset(_PROVIDER_REGISTRY)

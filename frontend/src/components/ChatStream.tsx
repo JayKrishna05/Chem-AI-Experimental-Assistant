@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { useChatStream } from "@/hooks/useChatStream";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatStreamProps {
   messages: ReturnType<typeof useChatStream>["messages"];
@@ -29,7 +28,7 @@ export function ChatStream({ messages, onSuggestion }: ChatStreamProps) {
   }, [messages]);
 
   return (
-    <ScrollArea className="flex-1 p-4">
+    <div className="flex-1 overflow-y-auto p-4 flex flex-col">
       <div className="flex flex-col max-w-4xl mx-auto w-full pb-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center mt-12 gap-6 text-center px-4">
@@ -66,6 +65,6 @@ export function ChatStream({ messages, onSuggestion }: ChatStreamProps) {
         )}
         <div ref={bottomRef} />
       </div>
-    </ScrollArea>
+    </div>
   );
 }

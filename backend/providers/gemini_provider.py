@@ -68,6 +68,7 @@ class GeminiProvider(BaseProvider):
         messages: list[Message],
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -82,6 +83,7 @@ class GeminiProvider(BaseProvider):
         prompt: str,
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -90,3 +92,12 @@ class GeminiProvider(BaseProvider):
             "GeminiProvider.generate is not yet implemented.  "
             "See the module docstring for implementation guidance."
         )
+
+    def list_models(self) -> list[str]:
+        """Return known Gemini model names (static list — no live API call yet)."""
+        return [
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-2.0-flash",
+            "gemini-1.5-pro",
+        ]

@@ -4,7 +4,7 @@ Environment variables
 ---------------------
 ORD_PROVIDER
     Which provider to use.  Default: ``ollama``.
-    Supported values: ``ollama``, ``openai``, ``anthropic``, ``gemini``.
+    Supported values: ``ollama``, ``openai``, ``anthropic``, ``gemini``, ``groq``.
 
 ORD_PLANNER_MODEL
     Model to use for the planner role.  Default: ``qwen2.5:3b``.
@@ -24,6 +24,10 @@ ORD_ANTHROPIC_API_KEY
 
 ORD_GEMINI_API_KEY
     Google Gemini API key.  Required when ``ORD_PROVIDER=gemini``.
+
+ORD_GROQ_API_KEY
+    Groq API key.  Required when ``ORD_PROVIDER=groq``.
+    Obtain from https://console.groq.com/keys
 """
 
 from __future__ import annotations
@@ -69,6 +73,9 @@ class ProviderConfig:
     gemini_api_key: str | None = None
     """Google Gemini API key.  Required when ``provider == "gemini"``."""
 
+    groq_api_key: str | None = None
+    """Groq API key.  Required when ``provider == "groq"``."""
+
     _analysis_model_override: str | None = field(
         default=None, repr=False, compare=False
     )
@@ -99,6 +106,7 @@ def load_config() -> ProviderConfig:
         openai_api_key=os.environ.get("ORD_OPENAI_API_KEY"),
         anthropic_api_key=os.environ.get("ORD_ANTHROPIC_API_KEY"),
         gemini_api_key=os.environ.get("ORD_GEMINI_API_KEY"),
+        groq_api_key=os.environ.get("ORD_GROQ_API_KEY"),
         _analysis_model_override=analysis_model_override,
     )
     return cfg

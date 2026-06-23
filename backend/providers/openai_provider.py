@@ -70,6 +70,7 @@ class OpenAIProvider(BaseProvider):
         messages: list[Message],
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -84,6 +85,7 @@ class OpenAIProvider(BaseProvider):
         prompt: str,
         *,
         model: str | None = None,
+        timeout: float | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
@@ -92,3 +94,12 @@ class OpenAIProvider(BaseProvider):
             "OpenAIProvider.generate is not yet implemented.  "
             "See the module docstring for implementation guidance."
         )
+
+    def list_models(self) -> list[str]:
+        """Return known OpenAI model names (static list — no live API call yet)."""
+        return [
+            "gpt-4o",
+            "gpt-4o-mini",
+            "gpt-4-turbo",
+            "gpt-3.5-turbo",
+        ]

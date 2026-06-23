@@ -61,12 +61,11 @@ def format_response(
     ]
 
     import time
-    from backend.api.state import active_models
     
     start_time = time.time()
     prompt_size = len(sys_prompt) + len(user_content)
     
-    print(f"[Formatter Request] Planner model: {active_models.get('planner_model')}, Formatter model: {model}, Configured timeout: {timeout}, Prompt size: {prompt_size} chars")
+    print(f"[Formatter] model={model or 'provider-default'} timeout={timeout}s prompt_size={prompt_size}chars")
 
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:

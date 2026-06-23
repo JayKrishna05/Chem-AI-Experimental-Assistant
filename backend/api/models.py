@@ -15,9 +15,15 @@ class HealthResponse(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    provider: str | None = None
-    model: str | None = None
+    # Provider and model for the planner role
+    planner_provider: str | None = None
+    provider: str | None = None  # legacy alias for planner_provider
+    model: str | None = None     # planner model
+    planner_timeout: float | None = None
+    # Provider and model for the formatter role
+    formatter_provider: str | None = None
     formatter_model: str | None = None
+    formatter_timeout: float | None = None
 
 
 class ModelListResponse(BaseModel):
@@ -25,13 +31,19 @@ class ModelListResponse(BaseModel):
 
 
 class CurrentModelsResponse(BaseModel):
+    planner_provider: str | None = "ollama"
     planner_model: str | None
+    planner_timeout: float | None = 59.0
+    formatter_provider: str | None = "ollama"
     formatter_model: str | None
     formatter_timeout: float | None = 59.0
 
 
 class SetModelsRequest(BaseModel):
+    planner_provider: str | None = None
     planner_model: str | None = None
+    planner_timeout: float | None = None
+    formatter_provider: str | None = None
     formatter_model: str | None = None
     formatter_timeout: float | None = None
 

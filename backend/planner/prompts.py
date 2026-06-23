@@ -25,6 +25,9 @@ source_dataset_statistics - Dataset coverage ranking. Filters: reaction_type, so
 reaction_type_statistics  - Reaction type ranking. Filters: source_dataset, sort_by(reaction_count|procedure_count|yield_count|temperature_count), limit(int)
 reagent_statistics   - Most common solvents/reagents. Filters: reaction_type, source_dataset, limit(int)
 dataset_summary      - Total counts only (reactions, procedures, molecules, datasets). Filters: none
+compare_datasets     - Compare side-by-side datasets or reaction_types. Filters: group_by(source_dataset|reaction_type)
+top_yield_conditions - Find the conditions (catalysts/temp) that yield the highest %. Filters: reaction_type
+dataset_quality_report - Show nullability and metadata completeness. Filters: none
 
 RULES
 =====
@@ -163,13 +166,31 @@ Q: Most common reagents in Buchwald-Hartwig reactions
 A: {"tool": "reagent_statistics", "filters": {"reaction_type": "Buchwald-Hartwig"}}
 
 Q: Compare Buchwald-Hartwig and Suzuki reactions
-A: {"tool": "reaction_type_statistics", "filters": {"limit": 20}}
+A: {"tool": "compare_datasets", "filters": {"group_by": "reaction_type"}}
+
+Q: Compare source datasets
+A: {"tool": "compare_datasets", "filters": {"group_by": "source_dataset"}}
+
+Q: Compare the success rates of different datasets
+A: {"tool": "compare_datasets", "filters": {"group_by": "source_dataset"}}
 
 Q: Compare temperature distributions
 A: {"tool": "temperature_statistics", "filters": {}}
 
 Q: Compare yield distributions
 A: {"tool": "yield_statistics", "filters": {}}
+
+Q: What are the best conditions for Suzuki coupling?
+A: {"tool": "top_yield_conditions", "filters": {"reaction_type": "Suzuki"}}
+
+Q: Recommend reaction conditions for maximum yield
+A: {"tool": "top_yield_conditions", "filters": {}}
+
+Q: How can I optimize my reaction temperature?
+A: {"tool": "top_yield_conditions", "filters": {}}
+
+Q: Discuss dataset quality
+A: {"tool": "dataset_quality_report", "filters": {}}
 
 Q: What is the capital of France?
 A: {"tool": "__none__", "filters": {}}
