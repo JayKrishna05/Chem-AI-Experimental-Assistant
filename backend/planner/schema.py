@@ -100,9 +100,13 @@ TOOL_FILTER_SCHEMAS: dict[str, dict[str, type]] = {
     "dataset_summary": {},
     "compare_datasets": {
         "group_by": _STR,
+        "reaction_type": _STR,
+        "source_dataset": _STR,
+        "catalyst": _STR,
     },
     "top_yield_conditions": {
         "reaction_type": _STR,
+        "source_dataset": _STR,
     },
     "dataset_quality_report": {},
 }

@@ -1,15 +1,18 @@
-import { useState, KeyboardEvent } from "react";
-import { SendHorizontal } from "lucide-react";
+import { useState, KeyboardEvent, useRef } from "react";
+import { SendHorizontal, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { UploadDropzone } from "./UploadDropzone";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
+  onFileSelect: (file: File) => void;
   disabled: boolean;
 }
 
-export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onFileSelect, disabled }: ChatInputProps) {
   const [input, setInput] = useState("");
+  const [showDropzone, setShowDropzone] = useState(false);
 
   const handleSend = () => {
     if (!input.trim() || disabled) return;
@@ -24,8 +27,28 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
     }
   };
 
+  const handleFileSelect = (file: File) => {
+    setShowDropzone(false);
+    onFileSelect(file);
+  };
+
   return (
-    <div className="flex gap-2 p-4 bg-background border-t border-border">
+    <div className="relative flex gap-2 p-4 bg-background border-t border-border">
+      {showDropzone && (
+        <UploadDropzone 
+          onFileSelect={handleFileSelect}
+          onClose={() => setShowDropzone(false)}
+        />
+      )}
+      <Button 
+        onClick={() => setShowDropzone((prev) => !prev)} 
+        disabled={disabled}
+        size="icon"
+        variant={showDropzone ? "secondary" : "ghost"}
+        className="text-muted-foreground"
+      >
+        <Paperclip className="h-5 w-5" />
+      </Button>
       <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}

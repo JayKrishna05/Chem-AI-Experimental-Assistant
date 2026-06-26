@@ -1,5 +1,32 @@
 # CHANGE LOG
 
+## Phase 6: Frontend Integration & User Experience
+**Date:** 2026-06-26
+**Focus:** Integrating the upload pipeline natively into the chat interface without replicating backend logic.
+
+### Summary
+- **API Services:** Split frontend networking into decoupled modules (`services/api.ts`, `services/upload.ts`, `services/chat.ts`, `services/models.ts`). Configured to securely parse `NEXT_PUBLIC_API_URL`.
+- **Upload Hook:** Created an isolated `useUpload.ts` hook specifically to handle multipart/form-data upload events and states.
+- **UI Components:** Built a drag-and-drop `UploadDropzone.tsx`, a sleek progress-tracking `UploadPreview.tsx`, and a highly structured `ComparisonResultCard.tsx` (translating warnings, anomalies, and yields visually).
+- **Chat Integration:** Integrated the new upload state into `ChatInterface.tsx` and `ChatInput.tsx`. A successful upload now automatically pushes a `system`-role message into the chat flow containing the `ComparisonResultCard`, seamlessly followed by an automated prompt asking the assistant to summarize the result.
+- **System Capabilities:** Added a lightweight `/system/capabilities` endpoint to `backend/api/routes.py` for future-proof feature detection.
+- **Provider Initialization Resilience:** Implemented graceful degradation for missing provider credentials (e.g., missing Groq keys). The backend now catches initialization errors and surfaces an `available: false` status to the frontend, which renders a non-blocking warning banner rather than causing a fatal application crash.
+- **Dotenv Integration:** Explicitly added `load_dotenv()` to `backend/api/main.py` so environment variables are loaded securely from `.env` even when running directly via Uvicorn.
+
+## Phase 5 Implementation: Experiment Upload & Comparison Engine (MVP)
+**Date:** 2026-06-26
+**Focus:** Building a robust upload pipeline, decoupled validation, and comparison endpoints.
+
+### Summary
+- **Backend Architecture Cleanup:** Centralized all SQL tool filter building into `backend/tools/filters.py` and implemented unified `CommonFilters` across all analytical/chemistry tools, eradicating parameter mismatches.
+- **Experiment Models & Schemas:** Introduced `CanonicalExperiment` and `ValidationResult` in `backend/experiment/models.py` as the internal data transfer objects for all uploaded data.
+- **Independent Parsers:** Created `backend/experiment/parser.py` containing pure-Python parsers for JSON, CSV, and unstructured text heuristics.
+- **Normalizer & Validator:** Added `backend/experiment/normalizer.py` to standardize field aliases/units, and `backend/experiment/validator.py` to perform non-fatal validation checks (e.g. flagging `yield_percent > 100`).
+- **Comparison Service:** Built `backend/services/comparison_service.py` as a distinct business logic layer that queries DuckDB via existing tool functions to return semantic reports on temperature anomalies, optimal yields, and similar reactions.
+- **API Endpoints:** Live deployment of `POST /experiments/parse` and `POST /experiments/compare` in `routes.py`.
+- **Testing:** Implemented and passed unit tests (`tests/test_experiment_upload.py`) and API smoke tests (`tests/test_experiment_endpoints.py`).
+- **Documentation Refactor:** Regenerated `PROJECT_STATE`, `PROJECT_STRUCTURE`, `AI_HANDOFF`, `TASKS` and created deep-dive architecture reviews (`architecture_review_phase5.md`, `architecture_diagrams.md`, `comparison_result_design.md`, `experiment_persistence_plan.md`).
+
 ## Reliability Hardening Sprint (Phases 3-8)
 **Date:** 2026-06-23  
 **Focus:** Benchmarking, E2E Latency Auditing, and Tool Schema Alignment
@@ -9,7 +36,20 @@
 - **Latency & E2E Performance:** Executed >70 E2E tests across dual-providers (Planner=Ollama, Formatter=Groq/Ollama). Confirmed Groq formatter eliminates hallucination at ~0.4s latency. `performance_audit.md` generated.
 - **Planner-Tool Alignment:** Identified semantic overlaps and filter gaps in the backend DuckDB schema (e.g., analytical tools dropping catalyst filters). `planner_tool_alignment_audit.md` generated.
 - **Caching Recommendations:** Formalized caching strategy in `caching_opportunities_report.md` (recommending exact-match cache for the Formatter).
-- **Ready for Phase 5:** Concluded that planner/formatter layers are hardened and stable; Phase 5 comparison tools are the only remaining blocker.## Phase 4.5 Formatter Reliability Audit & A/B Evaluation
+- **Ready for Phase 5:** Concluded that planner/formatter layers are hardened and stable; Phase 5 comparison tools are the only remaining blocker.
+- **Formatter Abstraction**: Decoupled the formatting phase from the planning phase in `stream.py`, using Groq for fast generation and Ollama for planning.
+- **Planner Refactor**: Extracted robust schema mapping to `schema.py` and strict prompt control to `prompts.py`. Handled the `<thought>` XML parsing natively.
+- **Provider Interfaces**: Extracted common `BaseProvider` to swap `httpx` logic dynamically between Ollama and Groq at runtime based on UI dropdowns.
+
+### Phase 6: Frontend Integration & Upload Stabilization (2026-06-26)
+- **Upload Workflow MVP**: Built `UploadDropzone`, `UploadPreview`, and multipart file transmission in the UI.
+- **Comparison UI**: Structured `ComparisonResultCard` added to display anomalies and yields directly in the chat window.
+- **Formatter Pipeline Bypass**: Added `tool_result_override` to the Chat API to allow the UI to directly pipe upload comparison results into the Formatter, eliminating double Planner invocations and hallucinations.
+- **Yield Classification**: Migrated from a strict boolean suboptimal flag to a tiered threshold system (Excellent, Comparable, Slightly Below Optimal, Suboptimal).
+- **Toast Lifecycle Fix**: Added timeout-based cleanup to `useUpload.ts` to ensure upload preview toasts dismiss automatically after success or failure.
+- **Graceful Provider Degradation**: Fixed API failure cascading. Models endpoint now returns availability status.
+
+## Phase 4.5 Formatter Reliability Audit & A/B Evaluation
 **Date:** 2026-06-23  
 **Focus:** Formatter prompt rewrite, hallucination isolation, and tool contract audits.
 

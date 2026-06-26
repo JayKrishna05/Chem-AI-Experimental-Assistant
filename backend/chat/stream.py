@@ -25,6 +25,7 @@ from collections.abc import Iterator
 from backend.api.models import ChatRequest
 from backend.chat.formatter import format_response
 from backend.planner import Planner
+from backend.planner.planner import PlannerResult
 from backend.providers import get_provider
 from backend.utils import sanitize_json
 
@@ -66,11 +67,20 @@ def stream_chat_events(request: ChatRequest) -> Iterator[str]:
     global_start = time.time()
     planner_start = time.time()
 
-    # 2. Run the planner (synchronous) — uses planner_provider + planner model
-    result = planner.plan(request.message, model=request.model, timeout=planner_timeout)
-    
-    planner_end = time.time()
-    planner_time_ms = int((planner_end - planner_start) * 1000)
+    if request.tool_result_override is not None:
+        result = PlannerResult(
+            question=request.message,
+            tool=request.tool_name_override or "upload_comparison",
+            filters={},
+            tool_result=request.tool_result_override,
+            success=True
+        )
+        planner_time_ms = 0
+    else:
+        # 2. Run the planner (synchronous) — uses planner_provider + planner model
+        result = planner.plan(request.message, model=request.model, timeout=planner_timeout)
+        planner_end = time.time()
+        planner_time_ms = int((planner_end - planner_start) * 1000)
 
     if not result.success:
         yield emit({"type": "error", "message": result.error})

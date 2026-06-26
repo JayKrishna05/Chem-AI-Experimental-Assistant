@@ -12,6 +12,12 @@ class HealthResponse(BaseModel):
     database_path: str
     database_available: bool
 
+class SystemCapabilitiesResponse(BaseModel):
+    upload_formats: list[str]
+    max_file_size_mb: int
+    features: list[str]
+
+
 
 class ChatRequest(BaseModel):
     message: str
@@ -24,10 +30,15 @@ class ChatRequest(BaseModel):
     formatter_provider: str | None = None
     formatter_model: str | None = None
     formatter_timeout: float | None = None
+    # Tool override to bypass planner
+    tool_result_override: dict[str, Any] | None = None
+    tool_name_override: str | None = None
 
 
 class ModelListResponse(BaseModel):
     models: list[str]
+    available: bool = True
+    error: str | None = None
 
 
 class CurrentModelsResponse(BaseModel):
@@ -46,6 +57,20 @@ class SetModelsRequest(BaseModel):
     formatter_provider: str | None = None
     formatter_model: str | None = None
     formatter_timeout: float | None = None
+
+
+class StandardResponse(BaseModel):
+    tool: str
+    contract_version: str
+    execution_time_ms: float
+    applied_filters: dict[str, Any]
+    filters: dict[str, Any]
+    limit: int
+    count: int
+    returned_rows: int
+    total_matching_rows: int
+    truncated: bool
+    assumptions: list[str]
 
 
 class ReactionSearchParams(BaseModel):
@@ -103,27 +128,15 @@ class MoleculeResult(BaseModel):
     occurrences: int | None = None
 
 
-class ReactionSearchResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
-    limit: int
-    count: int
+class ReactionSearchResponse(StandardResponse):
     results: list[ReactionResult]
 
 
-class ProcedureSearchResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
-    limit: int
-    count: int
+class ProcedureSearchResponse(StandardResponse):
     results: list[ProcedureResult]
 
 
-class MoleculeSearchResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
-    limit: int
-    count: int
+class MoleculeSearchResponse(StandardResponse):
     results: list[MoleculeResult]
 
 
@@ -149,13 +162,8 @@ class CatalystResult(BaseModel):
     reaction_count: int
 
 
-class CatalystStatisticsResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
-    limit: int
-    count: int
+class CatalystStatisticsResponse(StandardResponse):
     results: list[CatalystResult]
-    assumptions: list[str]
 
 
 class YieldStatisticsParams(BaseModel):
@@ -185,14 +193,16 @@ class YieldQualityChecks(BaseModel):
     above_hundred_count: int
 
 
-class YieldStatisticsResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
+class YieldStatisticsResult(BaseModel):
     metric: str
     coverage: NumericCoverage
     statistics: NumericSummary
-    assumptions: list[str]
-    quality_checks: YieldQualityChecks
+    quality_checks: YieldQualityChecks | None = None
+    clean_statistics: NumericSummary | None = None
+
+
+class YieldStatisticsResponse(StandardResponse):
+    results: list[YieldStatisticsResult]
 
 
 class TemperatureStatisticsParams(BaseModel):
@@ -200,17 +210,20 @@ class TemperatureStatisticsParams(BaseModel):
     source_dataset: str | None = None
 
 
-class TemperatureStatisticsResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
+class TemperatureStatisticsResult(BaseModel):
     metric: str
     coverage: NumericCoverage
     statistics: NumericSummary
-    assumptions: list[str]
+    clean_statistics: NumericSummary | None = None
+
+
+class TemperatureStatisticsResponse(StandardResponse):
+    results: list[TemperatureStatisticsResult]
 
 
 class SourceDatasetStatisticsParams(BaseModel):
     reaction_type: str | None = None
+    sort_by: str | None = "reaction_count"
     limit: int = Field(default=10, ge=1, le=100)
 
 
@@ -222,17 +235,13 @@ class DatasetCoverageResult(BaseModel):
     temperature_count: int
 
 
-class SourceDatasetStatisticsResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
-    limit: int
-    count: int
+class SourceDatasetStatisticsResponse(StandardResponse):
     results: list[DatasetCoverageResult]
-    assumptions: list[str]
 
 
 class ReactionTypeStatisticsParams(BaseModel):
     source_dataset: str | None = None
+    sort_by: str | None = "reaction_count"
     limit: int = Field(default=10, ge=1, le=100)
 
 
@@ -244,13 +253,8 @@ class ReactionTypeCoverageResult(BaseModel):
     temperature_count: int
 
 
-class ReactionTypeStatisticsResponse(BaseModel):
-    tool: str
-    filters: dict[str, Any]
-    limit: int
-    count: int
+class ReactionTypeStatisticsResponse(StandardResponse):
     results: list[ReactionTypeCoverageResult]
-    assumptions: list[str]
 
 
 class DatasetCounts(BaseModel):
@@ -274,9 +278,94 @@ class ProcedureCoverage(BaseModel):
     procedures_with_finite_temperature: int
 
 
-class DatasetSummaryResponse(BaseModel):
-    tool: str
+class DatasetSummaryResult(BaseModel):
     counts: DatasetCounts
     reaction_coverage: ReactionCoverage
     procedure_coverage: ProcedureCoverage
-    assumptions: list[str]
+
+
+class DatasetSummaryResponse(StandardResponse):
+    results: list[DatasetSummaryResult]
+
+
+class ReagentStatisticsParams(BaseModel):
+    reaction_type: str | None = None
+    source_dataset: str | None = None
+    limit: int = Field(default=10, ge=1, le=100)
+
+
+class ReagentResult(BaseModel):
+    reagent_smiles: str
+    reagent_name: str
+    reagent_entry_count: int
+    reaction_count: int
+
+
+class ReagentStatisticsResponse(StandardResponse):
+    results: list[ReagentResult]
+
+
+class CompareDatasetsParams(BaseModel):
+    group_by: str | None = "source_dataset"
+    reaction_type: str | None = None
+    source_dataset: str | None = None
+    catalyst: str | None = None
+
+
+class CompareDatasetsResult(BaseModel):
+    dataset_name: str
+    reaction_count: int
+    procedure_count: int
+    avg_yield: float
+    avg_temperature: float
+
+
+class CompareDatasetsResponse(StandardResponse):
+    results: list[CompareDatasetsResult]
+
+
+class TopYieldConditionsParams(BaseModel):
+    reaction_type: str | None = None
+    source_dataset: str | None = None
+
+
+class TopYieldConditionsResult(BaseModel):
+    reaction_type: str | None
+    catalyst: str
+    freq: int
+    avg_yield: float
+
+
+class TopYieldConditionsResponse(StandardResponse):
+    results: list[TopYieldConditionsResult]
+
+
+class DatasetQualityReportResult(BaseModel):
+    total_reactions: int
+    reactions_with_type: int
+    total_procedures: int
+    procedures_with_yield: int
+    procedures_with_temp: int
+
+
+class DatasetQualityReportResponse(StandardResponse):
+    results: list[DatasetQualityReportResult]
+
+
+# ---------------------------------------------------------------------------
+# Upload / Compare models
+# ---------------------------------------------------------------------------
+
+class UploadExperimentRequest(BaseModel):
+    content: str
+    format: str = Field(default="json", description="json, csv, or text")
+
+
+class ParseExperimentResponse(BaseModel):
+    experiments: list[Any]
+    warnings: list[str]
+    is_valid: bool
+
+
+class CompareExperimentResponse(BaseModel):
+    comparisons: list[Any]

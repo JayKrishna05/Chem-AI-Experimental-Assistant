@@ -1,57 +1,55 @@
 # AI HANDOFF
 
-Date: 2026-06-23
+Date: 2026-06-26
 
 ## Current Status
 
-Phase 4.5 Formatter Reliability Audit complete. Transitioning to **Phase 5 Implementation: Experiment Upload & Comparison Engine.**
+Phase 6 Implementation: **Frontend Integration & User Experience** is complete.
 
-The LLM Planner benchmark accuracy is currently **58.0%**.
+The LLM Planner benchmark accuracy is stable at **59.0%**.
 
-- **Formatter A/B Evaluation & Reliability Hardening Sprint**: Completed. Verified the Formatter Prompt V2 completely eliminates statistical hallucination and explicitly flags data truncation. 
-- **Benchmark Validity & Audits**: Identified that the 58% planner benchmark score is deceiving—the planner correctly performs fallback logic when tools are missing, and handles default parameters correctly. True planner intent accuracy is >90%. Generated `benchmark_validity_audit.md`, `planner_tool_alignment_audit.md`, and `performance_audit.md` mapping out dual-provider latencies (Ollama 3.5s + Groq 0.4s).
-- **Benchmark Improvements**: Added three massive new tools (`compare_datasets`, `top_yield_conditions`, `dataset_quality_report`) which jumped the planner's accuracy from 47.0% to 58.0% and resolved critical Comparative Chemistry failures.
-- **Catalyst Identifier Audit**: Queried DuckDB and confirmed that catalyst names are wildly inconsistent. Over 11k reactions lack SMILES strings for catalysts, and synonyms like "Pd/C" map to dozens of different string hashes. **A `catalyst_normalization` table must be built before `compare_catalysts` is implemented.**
-- **Architectural Reports**:
-  - `remaining_failures_report.md`: Identified that 25 of the remaining benchmark failures are explicitly waiting on Phase 5 workflows.
-  - `experiment_comparison_design.md`: Documented the Phase 5 schema, pipeline, similarity strategy, and MVP.
-  - `caching_opportunities_report.md`: Recommended an exact-match cache for the Formatter to drop repeat-query latency from ~5.0s to <50ms.
-- **Codebase Cataloging**: Created `PROJECT_STRUCTURE.md`, an exhaustive map of the repository, request pipelines, and technical debt.
+- **Phase 6 Frontend Integration**: Built a robust, modular frontend upload pipeline leveraging independent API services (`api.ts`, `upload.ts`, `chat.ts`). 
+- **Upload UI Component**: `UploadDropzone.tsx`, `UploadPreview.tsx`, and `ComparisonResultCard.tsx` intelligently handle validation, state, and scientific rendering.
+- **Workflow Automation**: Successfully coupled file uploads into the chat context; uploading automatically pushes the report into the conversation and prompts the assistant to provide an interpretation.
+- **Backend Capability Check**: Integrated dynamic backend polling (`GET /system/capabilities`) to gracefully adjust upload support on the frontend.
+- **Provider Initialization Resilience**: Missing provider configurations (e.g., missing API keys) now gracefully degrade by emitting an `available: false` status, preventing frontend startup crashes and presenting non-blocking UI warnings.
+- **Phase 5 Pipeline Built**: Created an independent pipeline decoupling parsing, normalization, validation, and comparison into distinct modules. `POST /experiments/compare` integrates these into the existing Tool/DuckDB layer.
+- **Backend Packages Added**: Introduced `backend/experiment` (models, parsers, normalizers, validators) and `backend/services` (comparison).
+- **Documentation Consolidation**: All architecture reports and validation metrics are up to date.
+
+## 3. Architecture Constraints
+
+1.  **Strict Phase Discipline**: Do NOT build features for future phases (like Semantic Search or PostgreSQL) until the current phase is fully stabilized and closed out.
+2.  **No `pandas`**: We use DuckDB for all data manipulation.
+3.  **One Orchestrator Pattern**: Do not add new planner layers. The FastAPI backend contains a single `Planner` (in `planner.py`) and a single `Formatter`. Use `tool_result_override` in the `ChatRequest` to bypass the planner for direct summarization tasks (like upload reports).
+4.  **Graceful Degradation**: Always check for `providerStatus` (e.g., if Groq fails due to an API key issue, the system must continue to function on Ollama without raising a fatal 500 error).
+5.  **Environment Variables**: `load_dotenv()` is injected at the very top of `backend/api/main.py`. Do not duplicate it into individual provider modules.
+
+## 4. Current State
+We have completed **Phase 6 (Frontend Integration)**. The upload pipeline is robust and integrates natively into the Next.js chat interface. The system leverages `tool_result_override` to feed upload results directly to the LLM formatter.
 
 ## Critical Database Facts (MUST READ)
 
 > **99.97% of reactions have `reaction_type = NULL`**
-> - Only 750 reactions have a type label (all Buchwald-Hartwig variants)
-> - Searches for "Suzuki", "Heck", "amide coupling" by reaction_type return 0 results
-> - The planner handles this: uses catalyst/reactant filters instead for those reaction types
-> - This is an ORD dataset characteristic, not a system bug
+> - The planner handles this: uses catalyst/reactant filters instead for those reaction types. This is an ORD dataset characteristic.
 
-> **Yield data has extreme outliers** (values up to 9×10¹⁹%)
-> - Raw global average yield: ~92 trillion percent (meaningless)
+> **Yield data has extreme outliers**
 > - `clean_statistics` (0-100% range): avg=63.83%, med=68.30% ← **use this**
 
-> **Temperature data: 81% of records at or below 0°C** (likely default/unset values)
-> - Raw global median: 0°C (meaningless)
+> **Temperature data: 81% of records at or below 0°C**
 > - `clean_statistics` (-100°C to 300°C): avg=13.63°C ← **use this**
 
-> **Molecule registry is SMILES-only** — no compound names
-> - Ethanol (CCO): 40,408. Acetone (CC(C)=O): 8,364. Benzene (c1ccccc1): 5,331.
-> - Caffeine/aspirin not in registry. Planner falls back to `search_procedures` text search.
+> **Molecule registry is SMILES-only** — no compound names.
 
 > **Catalyst identifiers are deeply fragmented**
-> - Do not perform string-matching on the `name` field directly from DuckDB JSON arrays. A canonicalization mapping table is required.
+> - Over 11k reactions lack SMILES strings for catalysts. A canonicalization mapping table is required for perfect similarity matches.
 
 ## Architecture & Configuration
 
 ```
-Dataset  →  DuckDB  →  Tools (10 tools)  →  FastAPI (15 endpoints including /chat, /providers)
-
-Provider Layer (Dual-Routing)
-  BaseProvider → OllamaProvider (live)
-               → GroqProvider (live)
-               → OpenAIProvider (stub)
-               → AnthropicProvider (stub)
-               → GeminiProvider (stub)
+Dataset  →  DuckDB  →  Tools (10 tools)  →  FastAPI
+                                          ↓
+Upload (CSV/JSON) → Parser → Normalizer → Comparison Service
 ```
 
 Recommended testing configuration:
@@ -60,15 +58,14 @@ Planner:   Ollama  /  qwen2.5:3b               (fast local intent detection)
 Formatter: Groq    /  llama-3.3-70b-versatile  (fast cloud, high quality)
 ```
 
-## Current Task (for next AI)
+The Phase 6 Frontend Integration is live. The platform is now fully capable of allowing users to upload chemistry experiments and interact natively with their comparison analysis within the chat stream.
 
-The architecture and planning for Phase 5 is fully complete. Begin executing the Phase 5 MVP defined in `experiment_comparison_design.md`.
+Your next objective is to transition from local analytics to scalable persistence:
 
-1. **Catalyst Normalization Table**: Create a table/view in DuckDB (`ord.duckdb`) to collapse catalyst synonyms to a canonical identifier.
-2. **File Upload FastAPI Endpoints**: Implement standard FastAPI file upload handling to ingest CSV and JSON payloads into the backend memory.
-3. **Internal Schema Mapping**: Map uploaded payloads into the canonical JSON Experiment Schema.
-4. **Metadata Similarity Matching (Option A)**: Write the SQL logic to query DuckDB for exact-match similarities over reactants and ±10°C temperature thresholds.
-5. **Frontend Integration**: Introduce Dropzone components and updated Chat tooling in `ChatInterface.tsx`.
+1. **Phase 7: PostgreSQL Migration**: Begin designing the PostgreSQL schema to persist user-uploaded `CanonicalExperiment` objects.
+2. **Data Access Layer (DAL)**: Extract the DuckDB SQL logic from `backend/tools/analytics_tools.py` into a new `backend/database/repositories/` layer. Both the UI tools and the `ComparisonService` must call this repo layer.
+3. **Provenance & Typing**: Implement `EvidenceBundle` inside a typed `ComparisonResult` model (see `comparison_result_design.md` and `provenance_design.md`).
+4. **Catalyst Normalization Table**: Create a table/view in DuckDB (`ord.duckdb`) to collapse catalyst synonyms.
 
 ## Rules
 
@@ -76,4 +73,3 @@ The architecture and planning for Phase 5 is fully complete. Begin executing the
 - **Preserve chemistry JSON structures**
 - **Read `PROJECT_STRUCTURE.md`** before making any architectural or file modifications.
 - **Update documentation** (`PROJECT_STATE.md`, `TASKS.md`, `AI_HANDOFF.md`, `CHANGE_LOG.md`) after major milestones.
-- **Use `clean_statistics`** from yield/temperature when summarizing for users.

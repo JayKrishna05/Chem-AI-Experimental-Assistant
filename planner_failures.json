@@ -1,0 +1,543 @@
+[
+  {
+    "query": "Summarize the database",
+    "expected_tool": "dataset_summary",
+    "expected_filters": {},
+    "actual_tool": "ERROR: LLM provider error: Network error connecting to Ollama at http://localhost:11434: timed out",
+    "actual_filters": {},
+    "raw_llm_response": "",
+    "error": "LLM provider error: Network error connecting to Ollama at http://localhost:11434: timed out",
+    "category": "Database Exploration",
+    "classification": "Supported"
+  },
+  {
+    "query": "Which datasets have the most reactions?",
+    "expected_tool": "source_dataset_statistics",
+    "expected_filters": {
+      "sort_by": "reaction_count"
+    },
+    "actual_tool": "source_dataset_statistics",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"source_dataset_statistics\", \"filters\": {}}",
+    "error": null,
+    "category": "Database Exploration",
+    "classification": "Supported"
+  },
+  {
+    "query": "Compare source datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "source_dataset"
+    },
+    "actual_tool": "compare_datasets",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"compare_datasets\", \"filters\": {}}",
+    "error": null,
+    "category": "Database Exploration",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Which datasets contain the most procedures?",
+    "expected_tool": "source_dataset_statistics",
+    "expected_filters": {
+      "sort_by": "procedure_count"
+    },
+    "actual_tool": "source_dataset_statistics",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"source_dataset_statistics\", \"filters\": {}}",
+    "error": null,
+    "category": "Database Exploration",
+    "classification": "Supported"
+  },
+  {
+    "query": "Find benzene",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "c1ccccc1"
+    },
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {
+      "query": "c1ccccc1"
+    },
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"query\": \"c1ccccc1\"}}",
+    "error": null,
+    "category": "Molecule Search",
+    "classification": "Partially Supported"
+  },
+  {
+    "query": "Molecule information for caffeine",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "caffeine"
+    },
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"text\": \"caffeine\"}}",
+    "error": null,
+    "category": "Molecule Search",
+    "classification": "Partially Supported"
+  },
+  {
+    "query": "Search molecules similar to aspirin",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {
+      "query": "aspirin"
+    },
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"query\": \"aspirin\"}}",
+    "error": null,
+    "category": "Molecule Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Lookup c1ccccc1",
+    "expected_tool": "molecule_lookup",
+    "expected_filters": {
+      "smiles": "c1ccccc1"
+    },
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {
+      "query": "c1ccccc1"
+    },
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"query\": \"c1ccccc1\"}}",
+    "error": null,
+    "category": "Molecule Search",
+    "classification": "Supported"
+  },
+  {
+    "query": "Molecule details for water",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "text": "water"
+    },
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {
+      "query": "water"
+    },
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"query\": \"water\"}}",
+    "error": null,
+    "category": "Molecule Search",
+    "classification": "Partially Supported"
+  },
+  {
+    "query": "Compare palladium and copper catalysts",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "catalyst_statistics",
+    "actual_filters": {
+      "limit": 50
+    },
+    "raw_llm_response": "{\"tool\": \"catalyst_statistics\", \"filters\": {\"limit\": 50}}",
+    "error": null,
+    "category": "Catalyst Analysis",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Which catalyst gives the highest yield?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "top_yield_conditions",
+    "actual_filters": {
+      "reaction_type": "Buchwald-Hartwig"
+    },
+    "raw_llm_response": "{\"tool\": \"top_yield_conditions\", \"filters\": {\"reaction_type\": \"Buchwald-Hartwig\"}}",
+    "error": null,
+    "category": "Catalyst Analysis",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Procedures above 100 C",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "temperature_min": 100.0
+    },
+    "actual_tool": "temperature_statistics",
+    "actual_filters": {
+      "reaction_type": "*"
+    },
+    "raw_llm_response": "{\"tool\": \"temperature_statistics\", \"filters\": {\"reaction_type\": \"*\", \"temperature_max\": 100}}",
+    "error": null,
+    "category": "Procedure Analysis",
+    "classification": "Supported"
+  },
+  {
+    "query": "High yield procedures",
+    "expected_tool": "search_procedures",
+    "expected_filters": {
+      "yield_min": 80.0
+    },
+    "actual_tool": "top_yield_conditions",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"top_yield_conditions\", \"filters\": {\"reaction_type\": \"\"}}",
+    "error": null,
+    "category": "Procedure Analysis",
+    "classification": "Supported"
+  },
+  {
+    "query": "Reactions using palladium",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "catalyst": "palladium"
+    },
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "catalyst": "Pd"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"catalyst\": \"Pd\"}}",
+    "error": null,
+    "category": "Reaction Analysis",
+    "classification": "Supported"
+  },
+  {
+    "query": "Reactions producing benzene",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "product": "benzene"
+    },
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "product": "c1ccccc1"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"product\": \"c1ccccc1\"}}",
+    "error": null,
+    "category": "Reaction Analysis",
+    "classification": "Supported"
+  },
+  {
+    "query": "Search reactions with acetone",
+    "expected_tool": "search_reactions",
+    "expected_filters": {
+      "reagent": "acetone"
+    },
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "reactant": "acetone"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"reactant\": \"acetone\"}}",
+    "error": null,
+    "category": "Reaction Analysis",
+    "classification": "Supported"
+  },
+  {
+    "query": "Compare Suzuki and Buchwald-Hartwig datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "actual_tool": "compare_datasets",
+    "actual_filters": {
+      "group_by": "source_dataset"
+    },
+    "raw_llm_response": "{\"tool\": \"compare_datasets\", \"filters\": {\"group_by\": \"source_dataset\"}}",
+    "error": null,
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "What is the difference between Palladium and Copper catalysts?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "catalyst_statistics",
+    "actual_filters": {
+      "reaction_type": "Buchwald-Hartwig"
+    },
+    "raw_llm_response": "{\"tool\": \"catalyst_statistics\", \"filters\": {\"reaction_type\": \"Buchwald-Hartwig\"}}",
+    "error": null,
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Which catalyst is better: Pd/C or Pt/C?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "catalyst_statistics",
+    "actual_filters": {
+      "reaction_type": "Palladium-Catalyzed Coupling"
+    },
+    "raw_llm_response": "{\"tool\": \"catalyst_statistics\", \"filters\": {\"reaction_type\": \"Palladium-Catalyzed Coupling\", \"catalyst\": \"Pd/C\"}}",
+    "error": null,
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Compare temperature profiles of different reaction types",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "reaction_type"
+    },
+    "actual_tool": "temperature_statistics",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"temperature_statistics\", \"filters\": {\"group_by\": \"reaction_type\"}}",
+    "error": null,
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Compare the success rates of different datasets",
+    "expected_tool": "compare_datasets",
+    "expected_filters": {
+      "group_by": "source_dataset"
+    },
+    "actual_tool": "compare_datasets",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"compare_datasets\", \"filters\": {}}",
+    "error": null,
+    "category": "Comparative Chemistry",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Find reactions similar to this one",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "reaction_type": "Buchwald-Hartwig"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"reaction_type\": \"Buchwald-Hartwig\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Find molecules structurally similar to benzene",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {
+      "query": "c1ccccc1"
+    },
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"query\": \"c1ccccc1\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Show me procedures like this one",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_procedures",
+    "actual_filters": {
+      "text": "this one"
+    },
+    "raw_llm_response": "{\"tool\": \"search_procedures\", \"filters\": {\"text\": \"this one\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Find reactions using similar catalysts to Pd/C",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "catalyst": "Pd/.*"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"catalyst\": \"Pd/.*\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Are there any molecules similar to caffeine?",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_procedures",
+    "actual_filters": {
+      "text": "caffeine"
+    },
+    "raw_llm_response": "{\"tool\": \"search_procedures\", \"filters\": {\"text\": \"caffeine\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Find reactions that have similar products to this",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "product": "similar_product"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"product\": \"similar_product\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Search for procedures with similar text",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "compare_datasets",
+    "actual_filters": {
+      "group_by": "reaction_type"
+    },
+    "raw_llm_response": "{\"tool\": \"compare_datasets\", \"filters\": {\"group_by\": \"reaction_type\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Find similar reactions by structural fingerprint",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"similarity_score\": \"structural_fingerprint\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Find reactions analogous to Suzuki",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "reaction_type": "Suzuki"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"reaction_type\": \"Suzuki\"}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Search for similar reagents",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "reagent_statistics",
+    "actual_filters": {
+      "limit": 20
+    },
+    "raw_llm_response": "{\"tool\": \"reagent_statistics\", \"filters\": {\"limit\": 20}}",
+    "error": null,
+    "category": "Similarity Search",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Recommend a catalyst for hydrogenation",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "catalyst_statistics",
+    "actual_filters": {
+      "reaction_type": "hydrogenation"
+    },
+    "raw_llm_response": "{\"tool\": \"catalyst_statistics\", \"filters\": {\"reaction_type\": \"hydrogenation\"}}",
+    "error": null,
+    "category": "Experimental Design",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Predict the yield of this reaction",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "top_yield_conditions",
+    "actual_filters": {
+      "reaction_type": "your_reaction_type"
+    },
+    "raw_llm_response": "{\"tool\": \"top_yield_conditions\", \"filters\": {\"reaction_type\": \"your_reaction_type\"}}",
+    "error": null,
+    "category": "Experimental Design",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Suggest an alternative solvent for this reaction",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "reagent_statistics",
+    "actual_filters": {
+      "reaction_type": "Alkylation"
+    },
+    "raw_llm_response": "{\"tool\": \"reagent_statistics\", \"filters\": {\"reaction_type\": \"Alkylation\"}}",
+    "error": null,
+    "category": "Experimental Design",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Design an experiment to test this catalyst",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {
+      "catalyst": "your_catalyst_of_choice"
+    },
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"catalyst\": \"your_catalyst_of_choice\"}}",
+    "error": null,
+    "category": "Experimental Design",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Predict the best catalyst for this reaction",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "top_yield_conditions",
+    "actual_filters": {
+      "reaction_type": "Buchwald-Hartwig"
+    },
+    "raw_llm_response": "{\"tool\": \"top_yield_conditions\", \"filters\": {\"reaction_type\": \"Buchwald-Hartwig\"}}",
+    "error": null,
+    "category": "Experimental Design",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Process this dataset of procedures",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_procedures",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"search_procedures\", \"filters\": {}}",
+    "error": null,
+    "category": "File Upload Workflows",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Analyze this CSV of molecules",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "molecule_lookup",
+    "actual_filters": {
+      "limit": 100
+    },
+    "raw_llm_response": "{\"tool\": \"molecule_lookup\", \"filters\": {\"limit\": 100}}",
+    "error": null,
+    "category": "File Upload Workflows",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Compare my uploaded reactions to the database",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "compare_datasets",
+    "actual_filters": {
+      "group_by": "reaction_type"
+    },
+    "raw_llm_response": "{\"tool\": \"compare_datasets\", \"filters\": {\"group_by\": \"reaction_type\"}}",
+    "error": null,
+    "category": "File Upload Workflows",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Extract conditions from this uploaded paper",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_procedures",
+    "actual_filters": {
+      "text": "uploaded paper"
+    },
+    "raw_llm_response": "{\"tool\": \"search_procedures\", \"filters\": {\"text\": \"uploaded paper\"}}",
+    "error": null,
+    "category": "File Upload Workflows",
+    "classification": "Unsupported"
+  },
+  {
+    "query": "Add this list of SMILES to the search",
+    "expected_tool": "__none__",
+    "expected_filters": {},
+    "actual_tool": "search_reactions",
+    "actual_filters": {},
+    "raw_llm_response": "{\"tool\": \"search_reactions\", \"filters\": {\"reactant\": [\"Cc1ccc(C(c2ccccc2)C(=O)c3cnc4n(ns3)nc4c3ccn5cc(Sc6sc(n[nH]7cccc8n7[Si](C)(C)c9ccccc9)c6s7)n5\", \"Cc1ccc(C(c2ccccc2)C(=O)c3cnc4n(ns3)nc4c3ccn5cc(Sc6sc(n[nH]7cccc8n7[Si](C)(C)c9ccccc9)c6s7)n5\"]}}",
+    "error": null,
+    "category": "File Upload Workflows",
+    "classification": "Unsupported"
+  }
+]

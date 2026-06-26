@@ -60,9 +60,11 @@ def list_models(provider: str | None = None) -> ModelListResponse:
         provider_name = provider or str(active_models.get("planner_provider", "ollama"))
         prov = get_provider(provider_name)
         models = prov.list_models()
-        return ModelListResponse(models=models)
+        return ModelListResponse(models=models, available=True)
+    except ValueError as e:
+        return ModelListResponse(models=[], available=False, error=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return ModelListResponse(models=[], available=False, error=str(e))
 
 
 @chat_router.get("/providers")

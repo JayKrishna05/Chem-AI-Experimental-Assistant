@@ -92,6 +92,35 @@ This is the authoritative codebase map for the AI Chemistry Engine V1. It serves
 - **Used By:** `backend/planner/planner.py`
 - **Notes:** Handles structural subset queries.
 
+#### `backend/experiment/models.py`
+- **Purpose:** Defines the `CanonicalExperiment` and `ValidationResult` schemas for the Phase 5 upload pipeline.
+- **Criticality:** HIGH
+- **Dependencies:** `pydantic`
+- **Used By:** `backend/experiment/parser.py`, `backend/services/comparison_service.py`
+- **Notes:** Every uploaded file format strictly maps to these internal DTOs.
+
+#### `backend/experiment/parser/`
+- **Purpose:** A modular package that dynamically dispatches and parses uploaded files (JSON, CSV, XLSX, Text) into `CanonicalExperiment` instances using dedicated sub-modules.
+- **Criticality:** MEDIUM
+- **Dependencies:** `openpyxl`, `backend.experiment.models`
+- **Used By:** `backend/api/routes.py`
+- **Notes:** Extensible dispatch architecture. Includes `dispatcher.py`, `parser_csv.py`, `parser_json.py`, `parser_xlsx.py`, `parser_text.py`.
+
+
+#### `backend/experiment/normalizer.py` & `validator.py`
+- **Purpose:** Standardizes units, field aliases, and string casing (Normalizer) and performs bounds/missing field checks emitting a `ValidationResult` (Validator).
+- **Criticality:** HIGH
+- **Dependencies:** `backend.experiment.models`
+- **Used By:** `backend/api/routes.py`
+- **Notes:** Ensures garbage data is flagged before reaching the database comparison layer.
+
+#### `backend/services/comparison_service.py`
+- **Purpose:** Analyzes a validated experiment against historical data via DuckDB tools to find temperature anomalies, optimal conditions, and identical reactions.
+- **Criticality:** HIGH
+- **Dependencies:** `backend.tools.analytics_tools`, `backend.tools.chemistry_tools`
+- **Used By:** `backend/api/routes.py`
+- **Notes:** Represents the first abstraction of a true Business Logic Layer separated from the LLM prompt layer.
+
 ### Frontend
 
 #### `frontend/src/app/page.tsx`
@@ -111,9 +140,29 @@ This is the authoritative codebase map for the AI Chemistry Engine V1. It serves
 #### `frontend/src/components/ChatStream.tsx` / `useChatStream.ts`
 - **Purpose:** Handles the actual SSE connection and parses the streaming chunks from the backend.
 - **Criticality:** HIGH
-- **Dependencies:** Browser `fetch` / EventStream APIs
+- **Dependencies:** Browser `fetch` / EventStream APIs, `frontend/src/services/chat.ts`
 - **Used By:** `ChatInterface.tsx`
-- **Notes:** Extremely brittle SSE parsing logic; do not modify without extensive testing.
+- **Notes:** Exposed `addCustomMessage` hook for injecting external UI cards (like the upload result).
+
+#### `frontend/src/services/`
+- **Purpose:** Modular API access layer decoupling network logic from UI components.
+- **Criticality:** HIGH
+- **Contents:** `api.ts` (base fetcher), `upload.ts` (multipart), `chat.ts` (SSE), `models.ts` (polling).
+- **Notes:** Introduced in Phase 6 to completely prevent hardcoding `localhost:8000`.
+
+#### `frontend/src/components/UploadDropzone.tsx` & `UploadPreview.tsx`
+- **Purpose:** Provide drag-and-drop ingestion for experimental datasets.
+- **Criticality:** MEDIUM
+- **Dependencies:** `lucide-react`
+- **Used By:** `ChatInput.tsx`
+- **Notes:** Strictly validates file types and sizes locally before firing API requests.
+
+#### `frontend/src/components/ComparisonResultCard.tsx`
+- **Purpose:** A structured, dynamic UI element representing the `CompareExperimentResponse` scientific insights (temperature anomalies, yields).
+- **Criticality:** MEDIUM
+- **Dependencies:** `lucide-react`, Shadcn UI
+- **Used By:** `ChatMessage.tsx`
+- **Notes:** Renders when a message has the `system` role and an `uploadResult` payload.
 
 #### `frontend/src/hooks/useModels.ts`
 - **Purpose:** Fetches available models from Ollama/Groq to populate UI dropdowns.

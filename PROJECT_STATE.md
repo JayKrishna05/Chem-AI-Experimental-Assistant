@@ -1,33 +1,28 @@
 # PROJECT STATE
 
-Last Updated: 2026-06-23
+Last Updated: 2026-06-26
 
 ## Current Phase
 
-Phase 4.5 Formatter Reliability Audit & Evaluation Framework → **Complete**. 
-Reliability Hardening Sprint → **Complete**. 
-Transitioning to Phase 5 Implementation.
+- [x] Phase 5: Experiment Upload & Comparison Engine (Backend MVP)
+- [x] Phase 6: User-Facing Functionality and UI Integration
+- [ ] Phase 7: Local DuckDB to PostgreSQL Migration (Scale-Up)
+- [ ] Phase 8: Semantic Search / Embeddings
 
 ## Completed
 
 - ORD dataset converted to JSONL
 - Procedure database extracted
 - Molecule registry built
-- Dataset validation completed
 - DuckDB schema created and ingested (`backend/database/ord.duckdb`)
 - DuckDB-backed tool layer and Analytics Tools implemented
 - FastAPI backend layer and SSE chat stream implemented
 - Next.js 15 Frontend Chat Interface with TailwindCSS and shadcn/ui
-- **Model Management & Dual-Provider Architecture**: Implemented full `OllamaProvider` and `GroqProvider` routing, allowing independent planner and formatter models/providers.
-- **Frontend Provider Integration**: Added dropdowns for Planner Provider/Model and Formatter Provider/Model.
-- **Analytics Tool Layer Expanded**: Added `compare_datasets`, `top_yield_conditions`, and `dataset_quality_report` to resolve comparative chemistry failures.
-- **Planner System Refined**: Planner prompt and schema updated to support 10 active tools. `__none__` mappings established for out-of-scope tools to enforce strict benchmark integrity.
-- **Benchmark Execution**: Validated the planner against 100 benchmark cases. **Final Accuracy: 58.0%**.
-- **Catalyst Normalization Audit**: Identified critical data hygiene issues (missing SMILES, huge synonym branching) proving direct string-matching of catalysts is non-viable without a normalization table.
-- **Codebase Cataloging**: Executed a full project structure audit (`PROJECT_STRUCTURE.md`).
-- **Phase 5 Architectural Design**: Designed the Experiment Comparison Architecture, capability audit, and MVP definitions (`experiment_comparison_design.md`).
-- **Phase 4.5 Formatter Reliability Audit**: Designed a highly analytical Formatter Prompt V2, audited tool contracts, and executed a 20-case A/B test against Groq's 70B model to eliminate statistical hallucinations.
-- **Reliability Hardening Sprint**: Validated Formatter Prompt V2 on a larger 20-case dataset, eradicated Formatter hallucinations (100% truncation detection), ran >100 Dual-Provider end-to-end executions for latency profiling, and finalized Phase 5 Architecture guidelines.
+- **Model Management & Dual-Provider Architecture**: Implemented full `OllamaProvider` and `GroqProvider` routing.
+- **Planner System Refined**: Planner prompt and schema updated to support 10 active tools. Final Benchmark Accuracy: 59.0%.
+- **Architecture Cleanup**: Unified filtering schemas, standardizing the DuckDB SQL tooling into `backend/tools/filters.py`.
+- **Phase 5 MVP**: Created the Experiment Upload pipeline featuring decoupled Parsing, Normalization, Validation, and Comparison Service modules. New endpoints `POST /experiments/parse` and `POST /experiments/compare` are live.
+- **Phase 6 Completed**: Integrated dropzone UI, multipart upload service, `ComparisonResultCard`, and Formatter pipeline bypass for direct upload summarization. Fixed provider resiliency gracefully degrading when unavailable.
 
 ## Critical Database Facts
 
@@ -45,26 +40,23 @@ Datasets:
 
 ## Current Focus
 
-- **Phase 5 Implementation: Experiment Upload & Comparison Engine**
-  - Building the Catalyst Normalization table in DuckDB.
-  - Implementing the MVP File Upload pipeline in FastAPI to parse CSV/JSON into the internal Experiment Schema.
-  - Building the metadata similarity matching SQL logic.
+- **Catalyst Normalization Engine**: We still need to build the `catalyst_normalization` lookup table in DuckDB to handle the 11,000 fragmented synonym hashes.
+- **Architecture Readiness**: Preparing for Phase 7 (PostgreSQL Migration) since the React frontend and Backend pipeline are now stable.
 
 ## Next Milestones
 
-1. **Catalyst Normalization**: Create `catalyst_normalization` lookup table to fix synonym branching.
-2. **File Upload API**: Expose `POST /api/experiments/upload` accepting CSV/JSON/PDF.
-3. **Internal Schema Mapping**: Map uploaded files to canonical JSON schema.
-4. **Similarity Engine (MVP)**: Implement Option A (DuckDB metadata matching) for reactions, procedures, and conditions.
-5. **Frontend Integration**: Add dropzone UI and specialized Experiment Comparison rendering to the chat interface.
+1. **Data Access Layer (DAL) Refactor**: Extract DuckDB SQL strings from `analytics_tools.py` into a true Repository layer so the Comparison Service can consume them natively without parsing UI tool contracts.
+2. **Frontend Integration**: Add file dropzone UI to the chat interface.
+3. **Catalyst Normalization**: Create the canonical mapping table in DuckDB to replace the hardcoded `normalizer.py` dictionary.
+4. **Strong Typing & Provenance**: Upgrade `ComparisonService` to return `ComparisonResult` models equipped with `EvidenceBundle` provenance tracking.
+5. **Database Migration**: Plan the transition from DuckDB to PostgreSQL/SQLAlchemy.
 
 ## Infrastructure Status
 
 - **Database**: DuckDB fully populated.
-- **Backend**: FastAPI retrieval, streaming chat API, and Dual-Provider routing live.
-- **Providers**: BaseProvider + OllamaProvider + GroqProvider live.
-- **Planner**: 58.0% accuracy. 10 tools active.
-- **Frontend**: Phase 4 completed. Fully responsive model configuration and tool rendering.
+- **Backend**: FastAPI retrieval, dual-provider routing, and experiment upload live.
+- **Planner**: 59.0% accuracy. 10 tools active.
+- **Frontend**: Responsive chat UI with provider selectors.
 
 ## Documentation Map
 - **`PROJECT_STATE.md`**: This document (high level status).
@@ -72,6 +64,7 @@ Datasets:
 - **`CHANGE_LOG.md`**: Running timeline of accomplished milestones.
 - **`TASKS.md`**: Granular execution checklists for the current active phase.
 - **`AI_HANDOFF.md`**: Context retention specifically curated for LLM Agents starting new sessions.
+- **`architecture_diagrams.md`**: Visual Mermaid diagrams of the system architecture.
 
 ## Repository Status
 

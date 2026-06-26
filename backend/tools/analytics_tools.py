@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any
 
-from .chemistry_tools import DEFAULT_LIMIT, _like_pattern, _normalize_limit
 from .db import connect_read_only
-
-
 from backend.utils import sanitize_json
+from .filters import CommonFilters, build_filters, build_where_sql, build_limit, format_tool_response
+
+
+DEFAULT_LIMIT = 10
+MAX_LIMIT = 100
 
 def _fetch_one(
     database_path: str | Path | None,
@@ -37,26 +40,6 @@ def _fetch_all(
     return [sanitize_json(dict(zip(columns, row, strict=True))) for row in rows]
 
 
-def _reaction_filters(
-    reaction_type: str | None = None,
-    source_dataset: str | None = None,
-    alias: str = "r",
-) -> tuple[list[str], list[Any]]:
-    clauses: list[str] = []
-    params: list[Any] = []
-    if reaction_type:
-        clauses.append(f"{alias}.reaction_type ILIKE ?")
-        params.append(_like_pattern(reaction_type))
-    if source_dataset:
-        clauses.append(f"{alias}.source_dataset ILIKE ?")
-        params.append(_like_pattern(source_dataset))
-    return clauses, params
-
-
-def _where_sql(clauses: list[str]) -> str:
-    return f"WHERE {' AND '.join(clauses)}" if clauses else ""
-
-
 def _numeric_statistics(
     *,
     tool: str,
@@ -65,13 +48,14 @@ def _numeric_statistics(
     value_name: str,
     where_clauses: list[str],
     params: list[Any],
-    filters: dict[str, Any],
+    applied_filters: dict[str, Any],
     assumptions: list[str],
     database_path: str | Path | None,
+    start_time: float,
 ) -> dict[str, Any]:
     valid_clause = f"{value_column} IS NOT NULL AND isfinite({value_column})"
-    where_sql = _where_sql([*where_clauses, valid_clause])
-    all_where_sql = _where_sql(where_clauses)
+    where_sql = build_where_sql([*where_clauses, valid_clause])
+    all_where_sql = build_where_sql(where_clauses)
 
     summary = _fetch_one(
         database_path,
@@ -109,14 +93,20 @@ def _numeric_statistics(
         params,
     )
 
-    return {
-        "tool": tool,
-        "filters": filters,
+    results_dict = {
         "metric": value_name,
         "coverage": coverage,
         "statistics": summary,
-        "assumptions": assumptions,
     }
+
+    return format_tool_response(
+        tool_name=tool,
+        applied_filters=applied_filters,
+        results=results_dict,
+        total_matching_rows=coverage.get("total_records", 0) if coverage else 0,
+        assumptions=assumptions,
+        start_time=start_time,
+    )
 
 
 def catalyst_statistics(
@@ -127,10 +117,15 @@ def catalyst_statistics(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Rank catalyst entries by occurrence and distinct reaction coverage."""
-    row_limit = _normalize_limit(limit)
-    where_clauses, params = _reaction_filters(reaction_type, source_dataset)
+    start_time = time.time()
+    row_limit = build_limit(limit, MAX_LIMIT)
+    applied_filters = {"reaction_type": reaction_type, "source_dataset": source_dataset}
+    filters_model = CommonFilters(**applied_filters)
+    
+    where_clauses, params = build_filters(filters_model, reaction_alias="r")
     where_clauses.append("json_array_length(r.catalysts_json) > 0")
-    where_sql = _where_sql(where_clauses)
+    where_sql = build_where_sql(where_clauses)
+    
     count_res = _fetch_one(
         database_path,
         f"""
@@ -147,7 +142,6 @@ def catalyst_statistics(
         params,
     )
     total_matching_rows = count_res["c"] if count_res else 0
-
     params.append(row_limit)
 
     results = _fetch_all(
@@ -168,24 +162,19 @@ def catalyst_statistics(
         params,
     )
 
-    returned_rows = len(results)
-    return {
-        "tool": "catalyst_statistics",
-        "filters": {
-            "reaction_type": reaction_type,
-            "source_dataset": source_dataset,
-        },
-        "limit": row_limit,
-        "returned_rows": returned_rows,
-        "total_matching_rows": total_matching_rows,
-        "truncated": total_matching_rows > returned_rows,
-        "results": results,
-        "assumptions": [
+    return format_tool_response(
+        tool_name="catalyst_statistics",
+        applied_filters=applied_filters,
+        results=results,
+        total_matching_rows=total_matching_rows,
+        limit=row_limit,
+        assumptions=[
             "Catalysts are extracted from reactions.catalysts_json.",
             "A catalyst entry is one catalyst object in ORD-derived reaction JSON.",
             "reaction_count counts distinct reactions containing that catalyst entry.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def yield_statistics(
@@ -195,16 +184,14 @@ def yield_statistics(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Summarize procedure yield percentages for matching reactions."""
-    where_clauses: list[str] = []
-    params: list[Any] = []
-    table_expression = "procedures AS p"
-    if reaction_type:
-        where_clauses.append("p.reaction_type ILIKE ?")
-        params.append(_like_pattern(reaction_type))
-    if source_dataset:
-        table_expression = "procedures AS p JOIN reactions AS r ON r.reaction_id = p.reaction_id"
-        where_clauses.append("r.source_dataset ILIKE ?")
-        params.append(_like_pattern(source_dataset))
+    start_time = time.time()
+    applied_filters = {"reaction_type": reaction_type, "source_dataset": source_dataset}
+    filters_model = CommonFilters(**applied_filters)
+    
+    # We join reactions and procedures if filtering by source_dataset (on reactions)
+    # or even just reaction_type (could be on procedures, but standardizing to reactions alias).
+    table_expression = "procedures AS p JOIN reactions AS r ON r.reaction_id = p.reaction_id"
+    where_clauses, params = build_filters(filters_model, reaction_alias="r", procedure_alias="p")
 
     payload = _numeric_statistics(
         tool="yield_statistics",
@@ -212,8 +199,8 @@ def yield_statistics(
         value_column="p.yield_percent",
         value_name="yield_percent",
         where_clauses=where_clauses,
-        params=params,
-        filters={"reaction_type": reaction_type, "source_dataset": source_dataset},
+        params=params.copy(),
+        applied_filters=applied_filters,
         assumptions=[
             "Yields are read from procedures.yield_percent.",
             "Null and non-finite yields are excluded from numeric statistics.",
@@ -222,7 +209,10 @@ def yield_statistics(
             "Use clean_statistics for chemically meaningful 0-100% range.",
         ],
         database_path=database_path,
+        start_time=start_time,
     )
+    
+    # Add custom fields to payload
     payload["quality_checks"] = _fetch_one(
         database_path,
         f"""
@@ -234,12 +224,12 @@ def yield_statistics(
             COALESCE(SUM(CASE WHEN p.yield_percent BETWEEN 0 AND 100 THEN 1 ELSE 0 END), 0)
                 AS valid_range_count
         FROM {table_expression}
-        {_where_sql([*where_clauses, 'p.yield_percent IS NOT NULL AND isfinite(p.yield_percent)'])}
+        {build_where_sql([*where_clauses, 'p.yield_percent IS NOT NULL AND isfinite(p.yield_percent)'])}
         """,
         params,
     )
-    # Clean statistics: only valid 0-100% yields for meaningful summaries
-    valid_where = _where_sql([*where_clauses, "p.yield_percent >= 0", "p.yield_percent <= 100"])
+    
+    valid_where = build_where_sql([*where_clauses, "p.yield_percent >= 0", "p.yield_percent <= 100"])
     payload["clean_statistics"] = _fetch_one(
         database_path,
         f"""
@@ -260,7 +250,6 @@ def yield_statistics(
     return payload
 
 
-
 def temperature_statistics(
     *,
     reaction_type: str | None = None,
@@ -268,16 +257,12 @@ def temperature_statistics(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Summarize procedure temperatures in Celsius for matching reactions."""
-    where_clauses: list[str] = []
-    params: list[Any] = []
-    table_expression = "procedures AS p"
-    if reaction_type:
-        where_clauses.append("p.reaction_type ILIKE ?")
-        params.append(_like_pattern(reaction_type))
-    if source_dataset:
-        table_expression = "procedures AS p JOIN reactions AS r ON r.reaction_id = p.reaction_id"
-        where_clauses.append("r.source_dataset ILIKE ?")
-        params.append(_like_pattern(source_dataset))
+    start_time = time.time()
+    applied_filters = {"reaction_type": reaction_type, "source_dataset": source_dataset}
+    filters_model = CommonFilters(**applied_filters)
+    
+    table_expression = "procedures AS p JOIN reactions AS r ON r.reaction_id = p.reaction_id"
+    where_clauses, params = build_filters(filters_model, reaction_alias="r", procedure_alias="p")
 
     payload = _numeric_statistics(
         tool="temperature_statistics",
@@ -285,8 +270,8 @@ def temperature_statistics(
         value_column="p.temperature_c",
         value_name="temperature_c",
         where_clauses=where_clauses,
-        params=params,
-        filters={"reaction_type": reaction_type, "source_dataset": source_dataset},
+        params=params.copy(),
+        applied_filters=applied_filters,
         assumptions=[
             "Temperatures are read from procedures.temperature_c.",
             "Null and non-finite temperatures are excluded from numeric statistics.",
@@ -295,9 +280,10 @@ def temperature_statistics(
             "Use clean_statistics for the chemically meaningful -100°C to 300°C range.",
         ],
         database_path=database_path,
+        start_time=start_time,
     )
-    # Clean statistics: chemically plausible range only
-    valid_where = _where_sql([*where_clauses, "p.temperature_c >= -100", "p.temperature_c <= 300"])
+    
+    valid_where = build_where_sql([*where_clauses, "p.temperature_c >= -100", "p.temperature_c <= 300"])
     payload["clean_statistics"] = _fetch_one(
         database_path,
         f"""
@@ -318,7 +304,6 @@ def temperature_statistics(
     return payload
 
 
-
 def source_dataset_statistics(
     *,
     reaction_type: str | None = None,
@@ -327,12 +312,17 @@ def source_dataset_statistics(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Summarize reaction/procedure/yield coverage by ORD source dataset."""
-    row_limit = _normalize_limit(limit)
+    start_time = time.time()
+    row_limit = build_limit(limit, MAX_LIMIT)
+    applied_filters = {"reaction_type": reaction_type, "sort_by": sort_by}
+    
     if sort_by not in ("reaction_count", "procedure_count", "yield_count", "temperature_count"):
         sort_by = "reaction_count"
+        
+    filters_model = CommonFilters(reaction_type=reaction_type)
+    where_clauses, params = build_filters(filters_model, reaction_alias="r")
+    where_sql = build_where_sql(where_clauses)
     
-    where_clauses, params = _reaction_filters(reaction_type=reaction_type)
-    where_sql = _where_sql(where_clauses)
     count_res = _fetch_one(
         database_path,
         f"""
@@ -343,7 +333,6 @@ def source_dataset_statistics(
         params,
     )
     total_matching_rows = count_res["c"] if count_res else 0
-
     params.append(row_limit)
 
     results = _fetch_all(
@@ -374,20 +363,18 @@ def source_dataset_statistics(
         params,
     )
 
-    returned_rows = len(results)
-    return {
-        "tool": "source_dataset_statistics",
-        "filters": {"reaction_type": reaction_type},
-        "limit": row_limit,
-        "returned_rows": returned_rows,
-        "total_matching_rows": total_matching_rows,
-        "truncated": total_matching_rows > returned_rows,
-        "results": results,
-        "assumptions": [
+    return format_tool_response(
+        tool_name="source_dataset_statistics",
+        applied_filters=applied_filters,
+        results=results,
+        total_matching_rows=total_matching_rows,
+        limit=row_limit,
+        assumptions=[
             "Source dataset coverage is computed from reactions.source_dataset.",
             "Procedure, yield, and temperature counts are joined by reaction_id.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def reaction_type_statistics(
@@ -398,12 +385,17 @@ def reaction_type_statistics(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Summarize reaction/procedure/yield coverage by reaction type."""
-    row_limit = _normalize_limit(limit)
+    start_time = time.time()
+    row_limit = build_limit(limit, MAX_LIMIT)
+    applied_filters = {"source_dataset": source_dataset, "sort_by": sort_by}
+    
     if sort_by not in ("reaction_count", "procedure_count", "yield_count", "temperature_count"):
         sort_by = "reaction_count"
         
-    where_clauses, params = _reaction_filters(source_dataset=source_dataset)
-    where_sql = _where_sql(where_clauses)
+    filters_model = CommonFilters(source_dataset=source_dataset)
+    where_clauses, params = build_filters(filters_model, reaction_alias="r")
+    where_sql = build_where_sql(where_clauses)
+    
     count_res = _fetch_one(
         database_path,
         f"""
@@ -414,7 +406,6 @@ def reaction_type_statistics(
         params,
     )
     total_matching_rows = count_res["c"] if count_res else 0
-
     params.append(row_limit)
 
     results = _fetch_all(
@@ -445,20 +436,18 @@ def reaction_type_statistics(
         params,
     )
 
-    returned_rows = len(results)
-    return {
-        "tool": "reaction_type_statistics",
-        "filters": {"source_dataset": source_dataset},
-        "limit": row_limit,
-        "returned_rows": returned_rows,
-        "total_matching_rows": total_matching_rows,
-        "truncated": total_matching_rows > returned_rows,
-        "results": results,
-        "assumptions": [
+    return format_tool_response(
+        tool_name="reaction_type_statistics",
+        applied_filters=applied_filters,
+        results=results,
+        total_matching_rows=total_matching_rows,
+        limit=row_limit,
+        assumptions=[
             "Reaction type coverage is computed from reactions.reaction_type.",
             "Procedure, yield, and temperature counts are joined by reaction_id.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def dataset_summary(
@@ -466,6 +455,7 @@ def dataset_summary(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Return high-level chemistry dataset coverage for the local ORD database."""
+    start_time = time.time()
     counts = _fetch_one(
         database_path,
         """
@@ -514,17 +504,24 @@ def dataset_summary(
         """,
     )
 
-    return {
-        "tool": "dataset_summary",
+    results_dict = {
         "counts": counts,
         "reaction_coverage": coverage,
         "procedure_coverage": procedure_coverage,
-        "assumptions": [
+    }
+    
+    return format_tool_response(
+        tool_name="dataset_summary",
+        applied_filters={},
+        results=results_dict,
+        total_matching_rows=counts.get("reaction_count", 0) if counts else 0,
+        assumptions=[
             "Counts are computed from the live DuckDB tables.",
             "Reaction coverage uses JSON array length checks on preserved chemistry fields.",
             "Procedure coverage reports both non-null and finite normalized scalar fields.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def reagent_statistics(
@@ -538,10 +535,15 @@ def reagent_statistics(
     
     Reagents include solvents and other additives stored in reactions.reagents_json.
     """
-    row_limit = _normalize_limit(limit)
-    where_clauses, params = _reaction_filters(reaction_type, source_dataset)
+    start_time = time.time()
+    row_limit = build_limit(limit, MAX_LIMIT)
+    applied_filters = {"reaction_type": reaction_type, "source_dataset": source_dataset}
+    filters_model = CommonFilters(**applied_filters)
+    
+    where_clauses, params = build_filters(filters_model, reaction_alias="r")
     where_clauses.append("json_array_length(r.reagents_json) > 0")
-    where_sql = _where_sql(where_clauses)
+    where_sql = build_where_sql(where_clauses)
+    
     count_res = _fetch_one(
         database_path,
         f"""
@@ -558,7 +560,6 @@ def reagent_statistics(
         params,
     )
     total_matching_rows = count_res["c"] if count_res else 0
-
     params.append(row_limit)
 
     results = _fetch_all(
@@ -579,42 +580,54 @@ def reagent_statistics(
         params,
     )
 
-    returned_rows = len(results)
-    return {
-        "tool": "reagent_statistics",
-        "filters": {
-            "reaction_type": reaction_type,
-            "source_dataset": source_dataset,
-        },
-        "limit": row_limit,
-        "returned_rows": returned_rows,
-        "total_matching_rows": total_matching_rows,
-        "truncated": total_matching_rows > returned_rows,
-        "results": results,
-        "assumptions": [
+    return format_tool_response(
+        tool_name="reagent_statistics",
+        applied_filters=applied_filters,
+        results=results,
+        total_matching_rows=total_matching_rows,
+        limit=row_limit,
+        assumptions=[
             "Reagents are extracted from reactions.reagents_json.",
             "This includes solvents, bases, and other additives classified as reagents in ORD.",
             "reaction_count counts distinct reactions containing that reagent entry.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def compare_datasets(
     *,
     group_by: str = "source_dataset",
+    reaction_type: str | None = None,
+    source_dataset: str | None = None,
+    catalyst: str | None = None,
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Compare high-level statistics across different datasets or reaction types."""
+    start_time = time.time()
     if group_by not in ("source_dataset", "reaction_type"):
         group_by = "source_dataset"
+
+    applied_filters = {
+        "group_by": group_by,
+        "reaction_type": reaction_type,
+        "source_dataset": source_dataset,
+        "catalyst": catalyst,
+    }
+    filters_model = CommonFilters(reaction_type=reaction_type, source_dataset=source_dataset, catalyst=catalyst)
+    where_clauses, params = build_filters(filters_model, reaction_alias="r")
+    where_clauses.append(f"r.{group_by} IS NOT NULL")
+    where_clauses.append(f"r.{group_by} != ''")
+    where_sql = build_where_sql(where_clauses)
 
     count_res = _fetch_one(
         database_path,
         f"""
         SELECT COUNT(DISTINCT r.{group_by}) as c
         FROM reactions AS r
-        WHERE r.{group_by} IS NOT NULL AND r.{group_by} != ''
-        """
+        {where_sql}
+        """,
+        params,
     )
     total_matching_rows = count_res["c"] if count_res else 0
 
@@ -639,38 +652,43 @@ def compare_datasets(
             COALESCE(AVG(pc.avg_temperature), 0) AS avg_temperature
         FROM reactions AS r
         LEFT JOIN procedure_counts AS pc ON pc.reaction_id = r.reaction_id
-        WHERE r.{group_by} IS NOT NULL AND r.{group_by} != ''
+        {where_sql}
         GROUP BY r.{group_by}
         ORDER BY reaction_count DESC
         LIMIT 50
         """,
+        params,
     )
 
-    returned_rows = len(results)
-    return {
-        "tool": "compare_datasets",
-        "filters": {"group_by": group_by},
-        "returned_rows": returned_rows,
-        "total_matching_rows": total_matching_rows,
-        "truncated": total_matching_rows > returned_rows,
-        "results": results,
-        "assumptions": [
+    return format_tool_response(
+        tool_name="compare_datasets",
+        applied_filters=applied_filters,
+        results=results,
+        total_matching_rows=total_matching_rows,
+        limit=50,
+        assumptions=[
             f"Comparing based on {group_by}.",
             "Averages are computed across procedures that have non-null values.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def top_yield_conditions(
     *,
     reaction_type: str | None = None,
+    source_dataset: str | None = None,
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Extract optimal reaction conditions (catalyst, temp) yielding the highest average yields."""
-    where_clauses, params = _reaction_filters(reaction_type)
+    start_time = time.time()
+    applied_filters = {"reaction_type": reaction_type, "source_dataset": source_dataset}
+    filters_model = CommonFilters(**applied_filters)
+    where_clauses, params = build_filters(filters_model, reaction_alias="r", procedure_alias="p")
+    
     where_clauses.append("r.reaction_type IS NOT NULL")
     where_clauses.append("p.yield_percent IS NOT NULL")
-    where_sql = _where_sql(where_clauses)
+    where_sql = build_where_sql(where_clauses)
     
     count_res = _fetch_one(
         database_path,
@@ -717,19 +735,18 @@ def top_yield_conditions(
         params,
     )
 
-    returned_rows = len(results)
-    return {
-        "tool": "top_yield_conditions",
-        "filters": {"reaction_type": reaction_type},
-        "returned_rows": returned_rows,
-        "total_matching_rows": total_matching_rows,
-        "truncated": total_matching_rows > returned_rows,
-        "results": results,
-        "assumptions": [
-            "Yield conditions are extracted for explicit reaction_type.",
+    return format_tool_response(
+        tool_name="top_yield_conditions",
+        applied_filters=applied_filters,
+        results=results,
+        total_matching_rows=total_matching_rows,
+        limit=20,
+        assumptions=[
+            "Yield conditions are extracted for explicitly matching reactions.",
             "Requires at least 5 reported yields for statistical significance.",
         ],
-    }
+        start_time=start_time,
+    )
 
 
 def dataset_quality_report(
@@ -737,6 +754,7 @@ def dataset_quality_report(
     database_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Generate a data quality report profiling nullability and metadata completeness."""
+    start_time = time.time()
     results = _fetch_one(
         database_path,
         """
@@ -751,12 +769,13 @@ def dataset_quality_report(
         """,
     )
 
-    return {
-        "tool": "dataset_quality_report",
-        "filters": {},
-        "results": results,
-        "assumptions": [
+    return format_tool_response(
+        tool_name="dataset_quality_report",
+        applied_filters={},
+        results=results,
+        total_matching_rows=results.get("total_reactions", 0) if results else 0,
+        assumptions=[
             "Profiles exact nullability counts across reactions and procedures.",
         ],
-    }
-
+        start_time=start_time,
+    )
