@@ -10,7 +10,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.tools import (  # noqa: E402
+from backend.tools.analytics_tools import (  # noqa: E402
     catalyst_statistics,
     dataset_summary,
     reaction_type_statistics,

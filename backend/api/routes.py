@@ -35,20 +35,22 @@ from backend.api.models import (
     TopYieldConditionsResponse,
     DatasetQualityReportResponse,
 )
-from backend.tools import (
+from backend.tools.analytics_tools import (
     catalyst_statistics,
     dataset_summary,
-    molecule_lookup,
     reaction_type_statistics,
     reagent_statistics,
-    search_procedures,
-    search_reactions,
     source_dataset_statistics,
     temperature_statistics,
     yield_statistics,
     compare_datasets,
-    top_yield_conditions,
     dataset_quality_report,
+    top_yield_conditions,
+)
+from backend.tools.chemistry_tools import (
+    molecule_lookup,
+    search_procedures,
+    search_reactions,
 )
 from backend.tools.db import DEFAULT_DB_PATH
 

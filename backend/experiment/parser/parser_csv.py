@@ -42,6 +42,12 @@ def parse_csv(data: str | bytes, source: str = "csv") -> list[CanonicalExperimen
         except (ValueError, TypeError):
             yld = None
             
+        # Clean raw_data to ensure no None keys or values
+        clean_row = {}
+        for i, (k, v) in enumerate(row.items()):
+            key = str(k).strip() if k is not None else f"column_{i}"
+            clean_row[key] = str(v) if v is not None else ""
+            
         exp = CanonicalExperiment(
             source=source,
             reaction_type=reaction_type,
@@ -51,7 +57,7 @@ def parse_csv(data: str | bytes, source: str = "csv") -> list[CanonicalExperimen
             products=products,
             temperature_c=temp,
             yield_percent=yld,
-            raw_data=row,
+            raw_data=clean_row,
         )
         experiments.append(exp)
         

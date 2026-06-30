@@ -159,3 +159,16 @@ Key fixes applied:
 - No `GET /providers` endpoint existed — added
 - `GET /models` could only query the active planner provider — now accepts `?provider=` param
 
+## Data Access Layer (DAL) Refactor (decided 2026-06-30)
+
+All direct DuckDB SQL queries have been removed from the Tool layer and encapsulated into dedicated domain Repositories (`backend/database/repositories/`).
+
+Rationale:
+- To allow the `ComparisonService` to query database statistics without parsing UI-oriented tool contracts.
+- To prevent test suite lock contention by centrally managing `read_only=True` connections via `BaseRepository`.
+- To establish a scalable backend architecture that isolates business logic from database interactions, preparing the system for a future PostgreSQL migration (Phase 7).
+
+Implementation:
+- Created `ReactionRepository`, `ProcedureRepository`, and `StatisticsRepository`.
+- Resolved circular imports by ensuring Repositories define their own Pydantic input models via `TYPE_CHECKING` instead of importing from `backend.tools.__init__`.
+

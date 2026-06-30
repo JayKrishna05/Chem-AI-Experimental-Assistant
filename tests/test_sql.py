@@ -2,7 +2,7 @@ import duckdb
 import json
 import traceback
 
-con = duckdb.connect("backend/database/ord.duckdb")
+con = duckdb.connect("backend/database/ord.duckdb", read_only=True)
 
 def test_compare_datasets():
     print("\n--- TEST: compare_datasets ---")

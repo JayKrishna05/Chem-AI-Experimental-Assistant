@@ -54,3 +54,38 @@ class UploadMetadata(BaseModel):
     parse_duration_ms: float = 0.0
     validation_score: float = 0.0
     warnings: list[str] = Field(default_factory=list)
+
+
+class EvidenceBundle(BaseModel):
+    """Provenance and evidence for scientific claims during comparison."""
+    matching_strategy: str = "none"
+    representative_reaction_ids: list[str] = Field(default_factory=list)
+    dataset_size: int = 0
+    sample_size: int = 0
+    statistical_method: str = "none"
+    assumptions: list[str] = Field(default_factory=list)
+    confidence_rationale: str = ""
+    query_filters: dict[str, Any] = Field(default_factory=dict)
+    excluded_rows: int = 0
+    mean: float | None = None
+    median: float | None = None
+    standard_deviation: float | None = None
+    execution_time_ms: float = 0.0
+
+
+class ComparisonResult(BaseModel):
+    """Strongly typed output of the Comparison Service."""
+    experiment_id: str
+    is_supported: bool = False
+    evidence: EvidenceBundle = Field(default_factory=EvidenceBundle)
+    
+    # Analysis outputs
+    yield_classification: str = "Unknown"  # Excellent Match, Comparable, Suboptimal, etc.
+    temperature_analysis: str = "Unknown"
+    conditions_analysis: str = "Unknown"
+    
+    # Detailed match information
+    literature_matches: int = 0
+    literature_yield_avg: float | None = None
+    literature_temp_avg: float | None = None
+

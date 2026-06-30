@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 and is archived here for reference.
+
 # Architecture Cleanup Report
 
 This report summarizes the architectural changes made during Phases 1-5 of the refactor ahead of the Phase 5 implementation (Experiment Upload & Comparison Engine).

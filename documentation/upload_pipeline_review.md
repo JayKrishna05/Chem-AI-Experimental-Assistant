@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 and is archived here for reference.
+
 # Upload Pipeline Robustness Review
 
 ## 1. Parser (`backend/experiment/parser.py`)

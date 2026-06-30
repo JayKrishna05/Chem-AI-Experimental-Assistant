@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 or 6 and is archived here for reference.
+
 # Comprehensive Capability Audit Report
 ## ORD AI Chemistry Assistant — Pre-Phase 5 Audit
 

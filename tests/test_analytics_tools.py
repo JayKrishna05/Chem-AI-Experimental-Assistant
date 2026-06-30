@@ -12,7 +12,7 @@ import duckdb
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.tools import (  # noqa: E402
+from backend.tools.analytics_tools import (  # noqa: E402
     catalyst_statistics,
     dataset_summary,
     reaction_type_statistics,
@@ -279,7 +279,7 @@ def test_top_yield_conditions():
 
 def test_dataset_quality_report():
     print("Testing dataset_quality_report...")
-    res = dataset_quality_report(database_path=DB_PATH)
+    res = dataset_quality_report(database_path=DEFAULT_DB_PATH)
     assert res["tool"] == "dataset_quality_report"
     assert "total_reactions" in res
     assert "procedures_with_yield" in res

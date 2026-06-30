@@ -35,20 +35,22 @@ from pathlib import Path
 from typing import Any, Callable
 
 from backend.providers.base import BaseProvider, Message
-from backend.tools import (
+from backend.tools.analytics_tools import (
     catalyst_statistics,
     dataset_summary,
-    molecule_lookup,
     reaction_type_statistics,
     reagent_statistics,
-    search_procedures,
-    search_reactions,
     source_dataset_statistics,
     temperature_statistics,
     yield_statistics,
     compare_datasets,
     top_yield_conditions,
     dataset_quality_report,
+)
+from backend.tools.chemistry_tools import (
+    molecule_lookup,
+    search_procedures,
+    search_reactions,
 )
 
 from .prompts import SYSTEM_PROMPT

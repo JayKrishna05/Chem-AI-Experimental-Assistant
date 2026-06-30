@@ -79,18 +79,25 @@ This is the authoritative codebase map for the AI Chemistry Engine V1. It serves
 - **Notes:** Requires `ORD_GROQ_API_KEY`. Extremely fast, used for formatter logic.
 
 #### `backend/tools/analytics_tools.py`
-- **Purpose:** Executes SQL queries against DuckDB for statistical and comparative chemistry.
+- **Purpose:** Exposes analytics operations (yield stats, temperature stats, compare datasets) as tools available to the LLM Planner.
 - **Criticality:** HIGH
-- **Dependencies:** `duckdb`
+- **Dependencies:** `backend.database.repositories`
 - **Used By:** `backend/planner/planner.py`
-- **Notes:** Houses the core Phase 4 tools (`compare_datasets`, `yield_statistics`, etc).
+- **Notes:** Delegates all database logic to the `StatisticsRepository`. Houses the core Phase 4 tools.
 
 #### `backend/tools/chemistry_tools.py`
-- **Purpose:** Executes basic lookups for SMILES, reactions, and procedures.
+- **Purpose:** Exposes basic lookup operations (SMILES, reactions, procedures) as tools to the LLM Planner.
+- **Criticality:** HIGH
+- **Dependencies:** `backend.database.repositories`
+- **Used By:** `backend/planner/planner.py`
+- **Notes:** Delegates all database logic to the `ReactionRepository` and `ProcedureRepository`.
+
+#### `backend/database/repositories/`
+- **Purpose:** The Data Access Layer (DAL). Manages safe `read_only=True` DuckDB connections and encapsulates all SQL queries.
 - **Criticality:** HIGH
 - **Dependencies:** `duckdb`
-- **Used By:** `backend/planner/planner.py`
-- **Notes:** Handles structural subset queries.
+- **Used By:** `backend/tools/*`, `backend/services/comparison_service.py`
+- **Notes:** Includes `base.py` (connection management), `reaction_repository.py`, `procedure_repository.py`, and `statistics_repository.py`. Solved earlier test-suite lock contentions.
 
 #### `backend/experiment/models.py`
 - **Purpose:** Defines the `CanonicalExperiment` and `ValidationResult` schemas for the Phase 5 upload pipeline.
@@ -115,11 +122,11 @@ This is the authoritative codebase map for the AI Chemistry Engine V1. It serves
 - **Notes:** Ensures garbage data is flagged before reaching the database comparison layer.
 
 #### `backend/services/comparison_service.py`
-- **Purpose:** Analyzes a validated experiment against historical data via DuckDB tools to find temperature anomalies, optimal conditions, and identical reactions.
+- **Purpose:** Analyzes a validated experiment against historical data via the Data Access Layer to find temperature anomalies, optimal conditions, and identical reactions.
 - **Criticality:** HIGH
-- **Dependencies:** `backend.tools.analytics_tools`, `backend.tools.chemistry_tools`
+- **Dependencies:** `backend.database.repositories`
 - **Used By:** `backend/api/routes.py`
-- **Notes:** Represents the first abstraction of a true Business Logic Layer separated from the LLM prompt layer.
+- **Notes:** Represents a true Business Logic Layer separated from the LLM prompt layer. Uses hierarchical similarity search (reaction_type -> reactants) and returns an `EvidenceBundle` with explicit confidence rationales.
 
 ### Frontend
 
@@ -179,6 +186,13 @@ This is the authoritative codebase map for the AI Chemistry Engine V1. It serves
 - **Dependencies:** `backend.planner`, `tests/planner_benchmark_cases.json`
 - **Used By:** CI / Developer Workflows
 - **Notes:** MUST be run to validate any prompt or schema changes.
+
+#### `tests/benchmarks/`
+- **Purpose:** Automated benchmarking suite for performance and accuracy metrics.
+- **Criticality:** MEDIUM
+- **Dependencies:** `pytest`
+- **Used By:** CI / Developer Workflows
+- **Notes:** Contains `test_benchmark_comparison.py` and `test_benchmark_parser.py`. Reports are saved to `benchmarks/reports/`.
 
 #### `tests/planner_benchmark_cases.json`
 - **Purpose:** 100 benchmark queries with their expected tools and filters.
@@ -245,9 +259,9 @@ All tools reside in `backend/tools/analytics_tools.py` and query DuckDB:
 
 ## 3. Refactor Candidates
 
-### `backend/tools/analytics_tools.py`
-- **Issue:** Approaching 600+ lines. Contains massive multi-line SQL strings intermingled with Python logic.
-- **Recommendation:** Extract SQL strings into a dedicated `backend/sql/` directory as `.sql` files, or use an ORM / query builder if complexity increases.
+### `backend/tools/`
+- **Issue:** Now that SQL is abstracted out, `analytics_tools.py` and `chemistry_tools.py` just map dictionary arguments to repository calls and wrap the results back into dictionaries with the `"tool"` key.
+- **Recommendation:** Consider refactoring these into a unified tool dispatch mechanism to further simplify the layer, or keep them as thin wrappers for clarity.
 
 ### `backend/chat/stream.py`
 - **Issue:** Handles SSE serialization, Planner invocation, Tool Dispatch, *and* Formatter invocation. It is violating the Single Responsibility Principle.

@@ -15,8 +15,13 @@ graph TD
     end
     
     subgraph Core Logic
-        T[Tool Layer & SQL Builders]
+        T[Tool Layer]
         E[Experiment Upload Pipeline]
+        S[Comparison Service]
+    end
+    
+    subgraph Data Access Layer
+        R[Repositories]
     end
     
     DB[(DuckDB)]
@@ -26,9 +31,12 @@ graph TD
     API --> E
     
     P --> T
-    E --> T
+    E --> S
     
-    T <--> DB
+    T --> R
+    S --> R
+    
+    R <--> DB
     T --> F
     F --> UI
 ```
@@ -42,6 +50,7 @@ sequenceDiagram
     participant FastAPI
     participant Planner
     participant ToolLayer
+    participant Repositories
     participant Formatter
 
     User->>Frontend: Sends text query
@@ -49,8 +58,10 @@ sequenceDiagram
     FastAPI->>Planner: Execute Planner Prompt
     Planner-->>FastAPI: Returns JSON (Tool + Filters)
     FastAPI->>ToolLayer: Dispatches selected tool
-    ToolLayer->>Database: Executes SQL
-    Database-->>ToolLayer: Raw JSON rows
+    ToolLayer->>Repositories: Calls repository method
+    Repositories->>Database: Executes SQL
+    Database-->>Repositories: Raw JSON rows
+    Repositories-->>ToolLayer: Domain DTOs / Dictionary
     ToolLayer-->>FastAPI: Standardized Response Contract
     FastAPI->>Formatter: Streams Context + Raw JSON
     Formatter-->>Frontend: SSE Markdown Stream
@@ -66,15 +77,13 @@ graph LR
     N -->|Standardized Fields| V(Validator)
     V -->|ValidationResult| S(Comparison Service)
     
-    subgraph Existing Tool Layer
-        S --> T1(search_reactions)
-        S --> T2(top_yield_conditions)
-        S --> T3(temperature_statistics)
+    subgraph Data Access Layer
+        S --> R1(ReactionRepository)
+        S --> R2(StatisticsRepository)
     end
     
-    T1 -.-> C(ComparisonResult)
-    T2 -.-> C
-    T3 -.-> C
+    R1 -.-> C(ComparisonResult)
+    R2 -.-> C
     
     C --> F(Formatter / UI rendering)
 ```
@@ -87,13 +96,13 @@ flowchart TD
     Planner -->|Selects Tool| Schema[backend/planner/schema.py]
     Schema -->|Validates arguments| Tools[backend/tools/]
     
-    subgraph DuckDB Operations
-        Tools --> F(backend/tools/filters.py)
-        F -->|build_filters| SQL[SQL Generation]
-        SQL --> DB[(DuckDB)]
+    subgraph Data Access Layer
+        Tools --> Repo[backend/database/repositories/]
+        Repo -->|Safe Read-Only Query| DB[(DuckDB)]
     end
     
-    DB --> Output[Standardized JSON Return]
+    DB --> Repo
+    Repo --> Output[Standardized JSON Return]
 ```
 
 ## 5. Future PostgreSQL Migration Architecture

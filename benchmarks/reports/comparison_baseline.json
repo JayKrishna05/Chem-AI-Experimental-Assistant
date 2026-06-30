@@ -1,0 +1,123 @@
+{
+  "benchmark_name": "Comparison Engine",
+  "timestamp": 1782825871.2480023,
+  "total_experiments": 3,
+  "results": [
+    {
+      "experiment_id": "8bb52a35-88c2-419c-a9e5-8076a4b6f67f",
+      "reaction_type": "Buchwald-Hartwig",
+      "execution_time_sec": 1.5468411445617676,
+      "report": {
+        "experiment_id": "8bb52a35-88c2-419c-a9e5-8076a4b6f67f",
+        "is_valid": true,
+        "warnings": [],
+        "confidence_score": 1.0,
+        "comparisons": {
+          "similarity": {
+            "strategy": "reaction_type",
+            "total_matches": 631,
+            "top_matches": [
+              "ord-006fb353766e418abd7ffca7f96dda71",
+              "ord-00b95f6f20354bb6923efd18c2b3c116",
+              "ord-019ad9f92b5c40ecbf5416e8a6461063",
+              "ord-01bb5c09bf964bc095ad839c85efa1ae",
+              "ord-0394a7894466450da1ab8d7f700166f5"
+            ]
+          },
+          "optimal_conditions": {
+            "matching_strategy": "reaction_type",
+            "best_catalyst": "{\"name\":\"metal and ligand\",\"smiles\":\"[Pd]\",\"moles\":0.00010800000018207356,\"is_limiting\":false}",
+            "best_avg_yield": 82.4,
+            "user_yield": 85.0,
+            "yield_classification": "Excellent Match",
+            "rationale": "Yield (85.0%) is within 0.5 standard deviations of the optimal dataset mean (82.4%)."
+          },
+          "temperature_profile": {
+            "user_temperature": 100.0,
+            "db_average_temperature": 108.19,
+            "difference": -8.19,
+            "is_anomalous": false
+          }
+        },
+        "evidence": {
+          "matching_strategy": "reaction_type",
+          "representative_reaction_ids": [
+            "ord-006fb353766e418abd7ffca7f96dda71",
+            "ord-00b95f6f20354bb6923efd18c2b3c116",
+            "ord-019ad9f92b5c40ecbf5416e8a6461063",
+            "ord-01bb5c09bf964bc095ad839c85efa1ae",
+            "ord-0394a7894466450da1ab8d7f700166f5"
+          ],
+          "dataset_size": 631,
+          "sample_size": 5,
+          "statistical_method": "none",
+          "assumptions": [
+            "0\u00b0C values excluded from clean_statistics due to ORD placeholder prevalence."
+          ],
+          "confidence_rationale": "Yield (85.0%) is within 0.5 standard deviations of the optimal dataset mean (82.4%).",
+          "query_filters": {},
+          "excluded_rows": 0,
+          "mean": 82.4,
+          "median": null,
+          "standard_deviation": 5.813776741499454,
+          "execution_time_ms": 1546.7469692230225
+        }
+      }
+    },
+    {
+      "experiment_id": "b2560e3b-d75b-41b2-8093-df22301c5731",
+      "reaction_type": "Suzuki",
+      "execution_time_sec": 4.0731964111328125,
+      "report": {
+        "experiment_id": "b2560e3b-d75b-41b2-8093-df22301c5731",
+        "is_valid": true,
+        "warnings": [],
+        "confidence_score": 1.0,
+        "comparisons": {},
+        "evidence": {
+          "matching_strategy": "none",
+          "representative_reaction_ids": [],
+          "dataset_size": 0,
+          "sample_size": 0,
+          "statistical_method": "none",
+          "assumptions": [],
+          "confidence_rationale": "",
+          "query_filters": {},
+          "excluded_rows": 0,
+          "mean": null,
+          "median": null,
+          "standard_deviation": null,
+          "execution_time_ms": 4073.1489658355713
+        }
+      }
+    },
+    {
+      "experiment_id": "813dd8a5-6133-41a3-a523-dea69a4ba509",
+      "reaction_type": null,
+      "execution_time_sec": 3.6142899990081787,
+      "report": {
+        "experiment_id": "813dd8a5-6133-41a3-a523-dea69a4ba509",
+        "is_valid": true,
+        "warnings": [],
+        "confidence_score": 1.0,
+        "comparisons": {},
+        "evidence": {
+          "matching_strategy": "none",
+          "representative_reaction_ids": [],
+          "dataset_size": 0,
+          "sample_size": 0,
+          "statistical_method": "none",
+          "assumptions": [],
+          "confidence_rationale": "",
+          "query_filters": {},
+          "excluded_rows": 0,
+          "mean": null,
+          "median": null,
+          "standard_deviation": null,
+          "execution_time_ms": 3614.2520904541016
+        }
+      }
+    }
+  ],
+  "total_execution_time_sec": 9.234403848648071
+}

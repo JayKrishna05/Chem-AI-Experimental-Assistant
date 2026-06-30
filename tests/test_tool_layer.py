@@ -9,7 +9,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.tools import molecule_lookup, search_procedures, search_reactions
+from backend.tools.chemistry_tools import molecule_lookup, search_procedures, search_reactions
 
 
 def assert_nonempty_result(name: str, payload: dict) -> None:

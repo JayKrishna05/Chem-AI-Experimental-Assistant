@@ -193,7 +193,7 @@ class YieldQualityChecks(BaseModel):
     above_hundred_count: int
 
 
-class YieldStatisticsResult(BaseModel):
+class YieldStatisticsResponse(StandardResponse):
     metric: str
     coverage: NumericCoverage
     statistics: NumericSummary
@@ -201,24 +201,16 @@ class YieldStatisticsResult(BaseModel):
     clean_statistics: NumericSummary | None = None
 
 
-class YieldStatisticsResponse(StandardResponse):
-    results: list[YieldStatisticsResult]
-
-
 class TemperatureStatisticsParams(BaseModel):
     reaction_type: str | None = None
     source_dataset: str | None = None
 
 
-class TemperatureStatisticsResult(BaseModel):
+class TemperatureStatisticsResponse(StandardResponse):
     metric: str
     coverage: NumericCoverage
     statistics: NumericSummary
     clean_statistics: NumericSummary | None = None
-
-
-class TemperatureStatisticsResponse(StandardResponse):
-    results: list[TemperatureStatisticsResult]
 
 
 class SourceDatasetStatisticsParams(BaseModel):
@@ -278,14 +270,10 @@ class ProcedureCoverage(BaseModel):
     procedures_with_finite_temperature: int
 
 
-class DatasetSummaryResult(BaseModel):
+class DatasetSummaryResponse(StandardResponse):
     counts: DatasetCounts
     reaction_coverage: ReactionCoverage
     procedure_coverage: ProcedureCoverage
-
-
-class DatasetSummaryResponse(StandardResponse):
-    results: list[DatasetSummaryResult]
 
 
 class ReagentStatisticsParams(BaseModel):
@@ -340,16 +328,12 @@ class TopYieldConditionsResponse(StandardResponse):
     results: list[TopYieldConditionsResult]
 
 
-class DatasetQualityReportResult(BaseModel):
+class DatasetQualityReportResponse(StandardResponse):
     total_reactions: int
     reactions_with_type: int
     total_procedures: int
     procedures_with_yield: int
     procedures_with_temp: int
-
-
-class DatasetQualityReportResponse(StandardResponse):
-    results: list[DatasetQualityReportResult]
 
 
 # ---------------------------------------------------------------------------

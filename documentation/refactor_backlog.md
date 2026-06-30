@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 or 6 and is archived here for reference.
+
 # Refactor Backlog
 
 This backlog contains only high-value, strictly necessary architectural improvements to stabilize the backend before major feature scaling (like PostgreSQL migration and UI integration). Speculative refactors are excluded.

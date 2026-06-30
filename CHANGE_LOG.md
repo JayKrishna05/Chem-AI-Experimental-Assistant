@@ -1,5 +1,18 @@
 # CHANGE LOG
 
+## Phase 6.5: Data Access Layer & Scientific Correctness
+**Date:** 2026-06-30
+**Focus:** Refactoring database interaction into a dedicated DAL and improving scientific similarity matching.
+
+### Summary
+- **Data Access Layer (DAL):** Extracted all raw SQL from `analytics_tools.py` and `chemistry_tools.py` into dedicated `backend/database/repositories/` (`reaction_repository.py`, `procedure_repository.py`, `statistics_repository.py`).
+- **Circular Imports & Locking:** Resolved test-crashing circular imports by eliminating top-level repository tool re-exports. Fixed DuckDB concurrent test locking by enforcing `read_only=True` in `BaseRepository` and updating `test_sql.py`.
+- **Scientific Correctness:** Upgraded `ComparisonService` to use hierarchical similarity matching (falling back to reactants/catalysts if `reaction_type` is NULL).
+- **Evidence Bundles:** Added explicit scientific assumptions (like 0°C anomalies) and confidence rationales directly into the `EvidenceBundle` inside the `ComparisonResult` DTO.
+- **Parser Robustness:** Modified `parser_csv.py` to correctly strip `"NaN"` and `"nan"` strings, preventing Pydantic validation crashes.
+- **Benchmarking:** Established automated Python benchmarks for parsing and comparison logic (`tests/benchmarks/`), with generated JSON baselines in `benchmarks/reports/`.
+
+
 ## Phase 6: Frontend Integration & User Experience
 **Date:** 2026-06-26
 **Focus:** Integrating the upload pipeline natively into the chat interface without replicating backend logic.

@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 6 and is archived here for reference.
+
 # Phase 6 UI Validation Report
 
 ## Overview

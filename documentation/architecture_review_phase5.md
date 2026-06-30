@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 and is archived here for reference.
+
 # Phase 5 Architecture Review
 
 ## Overview

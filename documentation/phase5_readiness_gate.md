@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 and is archived here for reference.
+
 # Phase 5 Readiness Gate
 
 This document evaluates whether the current architecture is ready for Phase 5 (Experiment Upload & Comparison Engine).

@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 or 6 and is archived here for reference.
+
 # Dependency Review
 
 ## Current Environment

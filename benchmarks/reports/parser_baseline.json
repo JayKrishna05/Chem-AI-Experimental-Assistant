@@ -1,0 +1,66 @@
+{
+  "benchmark_name": "CSV Parser",
+  "timestamp": 1782825880.976855,
+  "execution_time_sec": 0.00023412704467773438,
+  "total_parsed": 5,
+  "experiments": [
+    {
+      "reaction_type": "Buchwald-Hartwig",
+      "reactants": [
+        "chlorobenzene; morpholine"
+      ],
+      "products": [
+        "4-phenylmorpholine"
+      ],
+      "temperature_c": 100.0,
+      "yield_percent": 85.5
+    },
+    {
+      "reaction_type": "Suzuki",
+      "reactants": [
+        "phenylboronic acid",
+        "1",
+        "2-dichloroethane"
+      ],
+      "products": [
+        "biphenyl"
+      ],
+      "temperature_c": 80.0,
+      "yield_percent": 90.0
+    },
+    {
+      "reaction_type": "Amide Coupling",
+      "reactants": [
+        "[\"acetic acid\"",
+        "\"benzylamine\"]"
+      ],
+      "products": [
+        "N-benzylacetamide"
+      ],
+      "temperature_c": 25.0,
+      "yield_percent": null
+    },
+    {
+      "reaction_type": "Missing Temp",
+      "reactants": [
+        "reactant A"
+      ],
+      "products": [
+        "product B"
+      ],
+      "temperature_c": null,
+      "yield_percent": 50.0
+    },
+    {
+      "reaction_type": "Pipe separated",
+      "reactants": [
+        "reactant A | reactant B"
+      ],
+      "products": [
+        "product C"
+      ],
+      "temperature_c": 0.0,
+      "yield_percent": 20.0
+    }
+  ]
+}

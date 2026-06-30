@@ -4,18 +4,16 @@ Date: 2026-06-26
 
 ## Current Status
 
-Phase 6 Implementation: **Frontend Integration & User Experience** is complete.
+Phase 6.5 Implementation: **Data Access Layer & Scientific Correctness** is complete.
 
 The LLM Planner benchmark accuracy is stable at **59.0%**.
 
+- **Data Access Layer (DAL):** All raw DuckDB SQL is now centralized in `backend/database/repositories/` which cleanly isolates the business logic layer.
+- **Scientific Correctness:** `ComparisonService` now employs hierarchical similarity matching and provides complete `EvidenceBundle` provenances for all comparisons.
+- **Test Suite Resiliency:** Broken circular imports and DuckDB concurrency test locks were resolved. Python benchmarks have been established in `tests/benchmarks/`.
 - **Phase 6 Frontend Integration**: Built a robust, modular frontend upload pipeline leveraging independent API services (`api.ts`, `upload.ts`, `chat.ts`). 
-- **Upload UI Component**: `UploadDropzone.tsx`, `UploadPreview.tsx`, and `ComparisonResultCard.tsx` intelligently handle validation, state, and scientific rendering.
 - **Workflow Automation**: Successfully coupled file uploads into the chat context; uploading automatically pushes the report into the conversation and prompts the assistant to provide an interpretation.
-- **Backend Capability Check**: Integrated dynamic backend polling (`GET /system/capabilities`) to gracefully adjust upload support on the frontend.
 - **Provider Initialization Resilience**: Missing provider configurations (e.g., missing API keys) now gracefully degrade by emitting an `available: false` status, preventing frontend startup crashes and presenting non-blocking UI warnings.
-- **Phase 5 Pipeline Built**: Created an independent pipeline decoupling parsing, normalization, validation, and comparison into distinct modules. `POST /experiments/compare` integrates these into the existing Tool/DuckDB layer.
-- **Backend Packages Added**: Introduced `backend/experiment` (models, parsers, normalizers, validators) and `backend/services` (comparison).
-- **Documentation Consolidation**: All architecture reports and validation metrics are up to date.
 
 ## 3. Architecture Constraints
 
@@ -26,7 +24,7 @@ The LLM Planner benchmark accuracy is stable at **59.0%**.
 5.  **Environment Variables**: `load_dotenv()` is injected at the very top of `backend/api/main.py`. Do not duplicate it into individual provider modules.
 
 ## 4. Current State
-We have completed **Phase 6 (Frontend Integration)**. The upload pipeline is robust and integrates natively into the Next.js chat interface. The system leverages `tool_result_override` to feed upload results directly to the LLM formatter.
+We have completed **Phase 6.5 (Scientific Correctness & DAL)**. The backend now strictly separates Database logic (Repositories), Business Logic (`ComparisonService`), and Tool interfaces. The frontend upload pipeline seamlessly injects structured comparison results into the LLM context.
 
 ## Critical Database Facts (MUST READ)
 
@@ -47,8 +45,8 @@ We have completed **Phase 6 (Frontend Integration)**. The upload pipeline is rob
 ## Architecture & Configuration
 
 ```
-Dataset  →  DuckDB  →  Tools (10 tools)  →  FastAPI
-                                          ↓
+Dataset  →  DuckDB  →  Repositories  →  Tools (13 tools)  →  FastAPI
+                                  ↓
 Upload (CSV/JSON) → Parser → Normalizer → Comparison Service
 ```
 
@@ -58,14 +56,12 @@ Planner:   Ollama  /  qwen2.5:3b               (fast local intent detection)
 Formatter: Groq    /  llama-3.3-70b-versatile  (fast cloud, high quality)
 ```
 
-The Phase 6 Frontend Integration is live. The platform is now fully capable of allowing users to upload chemistry experiments and interact natively with their comparison analysis within the chat stream.
+The Phase 6.5 Data Access Layer refactor is live. The platform is now fully capable of allowing users to upload chemistry experiments, dynamically match against the repository layer using hierarchical constraints, and evaluate results natively within the chat stream.
 
 Your next objective is to transition from local analytics to scalable persistence:
 
 1. **Phase 7: PostgreSQL Migration**: Begin designing the PostgreSQL schema to persist user-uploaded `CanonicalExperiment` objects.
-2. **Data Access Layer (DAL)**: Extract the DuckDB SQL logic from `backend/tools/analytics_tools.py` into a new `backend/database/repositories/` layer. Both the UI tools and the `ComparisonService` must call this repo layer.
-3. **Provenance & Typing**: Implement `EvidenceBundle` inside a typed `ComparisonResult` model (see `comparison_result_design.md` and `provenance_design.md`).
-4. **Catalyst Normalization Table**: Create a table/view in DuckDB (`ord.duckdb`) to collapse catalyst synonyms.
+2. **Catalyst Normalization Table**: Create a table/view in DuckDB (`ord.duckdb`) to collapse catalyst synonyms.
 
 ## Rules
 

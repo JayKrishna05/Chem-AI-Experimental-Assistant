@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 or 6 and is archived here for reference.
+
 # Technical Debt Review
 
 This document audits the Phase 5 implementation (Experiment Upload & Comparison Engine) for technical debt, duplicated logic, and structural shortcomings before scaling.

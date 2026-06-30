@@ -1,3 +1,5 @@
+> **Historical Document**: This file was created during Phase 5 or 6 and is archived here for reference.
+
 # Filter Consistency Audit
 
 This document reviews the supported, dropped, and silently ignored filters across all search, analytics, and comparison-related DuckDB tools in the ORD Chemistry Engine.

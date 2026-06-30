@@ -248,6 +248,8 @@ Planner
 ↓
 Tool Execution
 ↓
+Repositories
+↓
 DuckDB
 ↓
 Analysis Model
